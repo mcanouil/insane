@@ -2140,13 +2140,37 @@ server <- function(input, output) {
           )
       }
     }
-    pout <- pout + scale_colour_manual(
-      name = paste0(ifelse(tab, "Warning!", "Clear!")),
-      values = unlist(ifelse(length(index) == 1, "gray30", list(palcolors))),
-      labels = function(x) {
-        gsub("CT_stat_(..).*_(.*)", "\\1_\\2", x)
+    pout <- ggplot(
+      data = FullDta, 
+      mapping = aes(x = Samples, y = Insulin, colour = ExpType, fill = ExpType)
+    ) + 
+      theme_minimal(base_size = input$fontsize) +
+      geom_boxplot(
+        fill = "white", 
+        outlier.shape = ifelse(input$removeallpoints | !input$removeoutlier, NA, 16)
+      )
+    if (input$removeallpoints) {
+      pout <- pout + 
+        geom_point(position = position_jitterdodge(jitter.width = widthbar / 2), shape = 4)
+      if (input$removelowfC) {
+        pout <- pout + 
+          geom_point(
+            data = subset(FullDta, LowFC), 
+            mapping = aes(y = InsulinAll), 
+            colour = myPalette()[2], 
+            position = position_jitterdodge(jitter.width = widthbar / 2), 
+            shape = 3
+          )
       }
-    ) +
+    }
+    pout <- pout + 
+      scale_colour_manual(
+        name = paste0(ifelse(tab, "Warning!", "Clear!")),
+        values = unlist(ifelse(length(index) == 1, "gray30", list(palcolors))),
+        labels = function(x) {
+          gsub("CT_stat_(..).*_(.*)", "\\1_\\2", x)
+        }
+      ) +
       scale_fill_manual(
         name = paste0(ifelse(tab, "Warning!", "Clear!")),
         values = unlist(ifelse(length(index) == 1, "gray30", list(palcolors))),
@@ -2160,7 +2184,10 @@ server <- function(input, output) {
       labs(x = "Stimulus", y = "Insulin secretion (% of content)") +
       # scale_y_continuous(limits = scaleNTPy) +
       theme(
-        axis.text = element_text(colour = ifelse(myPalette()[1] == "dodgerblue", "dodgerblue", "black"), face = "bold"),
+        axis.text = element_text(
+          colour = ifelse(myPalette()[1] == "dodgerblue", "dodgerblue", "black"), 
+          face = "bold"
+        ),
         legend.title = element_text(colour = myPalette()[3 - tab]),
         legend.position = "top",
         legend.justification = c(0.5, 0.5),
@@ -2171,6 +2198,94 @@ server <- function(input, output) {
         fill = guide_legend(nrow = ceiling(length(unique(dtaXX[, "ExpType"])) / 3)),
         colour = guide_legend(nrow = ceiling(length(unique(dtaXX[, "ExpType"])) / 3))
       )
+    
+    test_check <- length(unique(FullDta[, "ExpType"]))==2 & 
+      any(grepl("siNTP", FullDta[, "ExpType"])) &
+      all(table(na.exclude(FullDta[, c("Insulin", "ExpType", "Samples")])[, c("Samples", "ExpType")])>=3)
+    
+    if (test_check) {
+      lm_ins <- do.call(
+        "rbind",
+        by(data = FullDta, INDICES = FullDta[, "Samples"], FUN = function(idta) {
+          out <- broom::tidy(lm(formula = Insulin ~ ExpType, data = idta))
+          out <- out[-grep("Intercept", out[, "term"]), ]
+          out[, "term"] <- gsub("ExpType", "", out[, "term"])
+          out[, "y"] <- max(idta[, "Insulin"], na.rm = TRUE) + 0.1 * diff(range(idta[, "Insulin"], na.rm = TRUE))
+          out
+        })
+      )
+      lm_ins <- as.data.frame(lm_ins)
+      lm_ins[, "labels"] <- prettyNum(lm_ins[, "p.value"], digits = 3)
+      lm_ins[, "Samples"] <- factor(rownames(lm_ins), levels = levels(FullDta[, "Samples"]))
+      lm_ins[, "x"] <- as.numeric(lm_ins[, "Samples"])
+      lm_ins[, "xmin"] <- lm_ins[, "x"] - 0.45 / 2
+      lm_ins[, "xmax"] <- lm_ins[, "x"] + 0.45 / 2
+
+      if (legendOn & !all(is.na(lm_ins[, "y"]))) {
+        if (input$reportstars) {
+          lm_ins[, "labels"] <- factor(sapply(lm_ins[, "p.value"], signstars), levels = c("ns", "ns", "*", "**", "***"))
+          pout <- pout +
+            geom_errorbarh(
+              data = lm_ins,
+              mapping = aes(x = x, y = y, xmin = xmin, xmax = xmax),
+              height = 0, 
+              inherit.aes = FALSE, 
+              colour = "grey30"
+            )
+          if (any(lm_ins[, "labels"] %in% "ns")) {
+            pout <- pout +
+              geom_text(
+                data = subset(lm_ins, labels %in% "ns"),
+                mapping = aes(x = x, y = y, xmin = xmin, xmax = xmax, label = labels),
+                vjust = -0.25,
+                size = 5, 
+                inherit.aes = FALSE, 
+                colour = "grey30"
+              )
+          }
+          if (any(!lm_ins[, "labels"] %in% c("ns", "ns"))) {
+            pout <- pout +
+              geom_text(
+                data = subset(lm_ins, !labels %in% c("ns", "ns")),
+                mapping = aes(x = x, y = y, xmin = xmin, xmax = xmax, label = labels),
+                vjust = 0.40,
+                size = 8, 
+                inherit.aes = FALSE, 
+                colour = "grey30"
+              )
+          }
+          if (any(lm_ins[, "labels"] %in% ".")) {
+            pout <- pout +
+              geom_text(
+                data = subset(lm_ins, labels %in% "."),
+                mapping = aes(x = x, y = y, xmin = xmin, xmax = xmax, label = labels),
+                vjust = -0.25,
+                size = 10, 
+                inherit.aes = FALSE, 
+                colour = "grey30"
+              )
+          }
+        } else {
+          pout <- pout +
+            geom_errorbarh(
+              data = lm_ins,
+              mapping = aes(x = x, y = y, xmin = xmin, xmax = xmax),
+              height = 0, 
+              inherit.aes = FALSE, 
+              colour = "grey30"
+            ) +
+            geom_text(
+              data = lm_ins,
+              mapping = aes(x = x, y = y, xmin = xmin, xmax = xmax, label = labels),
+              vjust = -0.25,
+              size = 5, 
+              inherit.aes = FALSE, 
+              colour = "grey30"
+            )
+        }
+      }
+    }
+    
     return(pout)
   })
   output$NTPAnalysis_plot2bis <- renderPlot({
