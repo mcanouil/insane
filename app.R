@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Name - EndoC_Beta
-# Desc - Shiny App to analyse Endoc Beta experiements
+# Desc - Shiny App to analyse Endoc Beta experiments
 #        (gene silencing and insulin secretion)
 # Version - 1.2.0
 # Date - 2018/02/06
