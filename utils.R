@@ -38,14 +38,13 @@ plotDownloadInput <- function(id, plot_object, width, height, dpi) {
 }
 
 get_xlsx_contents <- function(path, od_outlier, lm_outlier) {
-  out_excel <- dplyr::tibble(file = list.files(path, full.names = TRUE)) %>%
+  out_excel <- dplyr::tibble(file = list.files(path, pattern = ".xlsx$", full.names = TRUE)) %>%
     dplyr::mutate(sheet_name = purrr::map(.data[["file"]], readxl::excel_sheets)) %>%
     tidyr::unnest(.data[["sheet_name"]]) %>%
     dplyr::mutate(
       nested_data = purrr::map2(.data[["file"]], .data[["sheet_name"]], function(.x, .y) {
         tmp <- suppressMessages({readxl::read_xlsx(.x, .y)})
         dplyr::mutate(tmp[, 1:grep("Operator", colnames(tmp))],
-          is_blank = NULL,
           re_OD = (.data[["OD2"]] - .data[["OD1"]]) / .data[["OD1"]],
           mean_OD = purrr::map2_dbl(.data[["OD1"]], .data[["OD2"]], ~ mean(c(.x, .y)))
         )
@@ -53,7 +52,6 @@ get_xlsx_contents <- function(path, od_outlier, lm_outlier) {
     ) %>%
     tidyr::unnest(nested_data) %>%
     dplyr::mutate(
-      is_blank = .data[["Step"]] == "BLANK",
       lower_threshold = stats::quantile(.data[["re_OD"]], 0.25) - od_outlier * stats::IQR(.data[["re_OD"]]),
       upper_threshold = stats::quantile(.data[["re_OD"]], 0.75) + od_outlier * stats::IQR(.data[["re_OD"]]),
       is_outlier = .data[["re_OD"]] < .data[["lower_threshold"]] | .data[["re_OD"]] > .data[["upper_threshold"]]

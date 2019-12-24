@@ -7,6 +7,8 @@ invisible(suppressPackageStartupMessages({
 
 source("utils.R")
 
+dir.create(file.path("www", "xlsx"), showWarnings = FALSE, mode = "0777")
+
 # UI-side ==========================================================================================
 ui <- shiny::navbarPage(
   theme = "yeti-bootstrap.min.css",
@@ -223,7 +225,8 @@ server <- function(input, output, session) {
   })
   
   output$xlsx_available <- DT::renderDataTable({
-    xlsx_contents() %>% 
+    req(input$xlsx_files)
+    req(xlsx_contents()) %>% 
       dplyr::group_by(file = basename(.data[["file"]])) %>% 
       dplyr::summarise_at(
         .vars = dplyr::vars(.data[["Date"]], .data[["Operator"]], .data[["sheet_name"]], .data[["Condition"]]), 
@@ -261,25 +264,24 @@ server <- function(input, output, session) {
       )
     )
   })
-  
-  observeEvent(input$xlsx_files, {
-    purrr::pmap(input$xlsx_files, function(name, size, type, datapath) {
-      file.copy(datapath, to = file.path("www", "xlsx", name), overwrite = TRUE)
-    })
-  })
-  
   xlsx_contents <- shiny::reactive({
    id <- shiny::showNotification(
       ui = "Data are loading, please wait ...", 
       duration = NULL, closeButton = FALSE
     )
     on.exit(shiny::removeNotification(id), add = TRUE)
-    shiny::req(length(list.files("www/xlsx")) != 0 | !is.null(input[["xlsx_files"]]))
-    get_xlsx_contents(
-      path = "www/xlsx", 
-      od_outlier = input[["od_outlier"]] %||% 1.5, 
-      lm_outlier = input[["lm_outlier"]] %||% 1.5
-    )
+    if (!is.null(input$xlsx_files)) {
+      purrr::pmap(req(input$xlsx_files), function(name, size, type, datapath) {
+        file.copy(datapath, to = file.path("www", "xlsx", name), overwrite = TRUE)
+      })
+    }
+    if (length(list.files(file.path("www", "xlsx"), pattern = ".xlsx$")) != 0) {
+      get_xlsx_contents(
+        path = "www/xlsx", 
+        od_outlier = input[["od_outlier"]] %||% 1.5, 
+        lm_outlier = input[["lm_outlier"]] %||% 1.5
+      )
+    }
   })
 
 
@@ -319,7 +321,8 @@ server <- function(input, output, session) {
       ggbeeswarm::geom_beeswarm(
         data = ~ dplyr::filter(.x, .data[["is_outlier"]]), 
         colour = "firebrick2",
-        size = input[["point_size"]]
+        size = input[["point_size"]],
+        groupOnX = TRUE
       ) +
       ggbeeswarm::geom_quasirandom(
         data = ~ dplyr::filter(.x, !.data[["is_outlier"]]), 
@@ -420,7 +423,8 @@ server <- function(input, output, session) {
       ggbeeswarm::geom_beeswarm(
         data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
         colour = "firebrick2",
-        size = input[["point_size"]]
+        size = input[["point_size"]],
+        groupOnX = TRUE
       ) +
       ggbeeswarm::geom_quasirandom(
         data = ~ dplyr::filter(.x, !.data[["is_outlier"]]),
