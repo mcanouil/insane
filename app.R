@@ -2,11 +2,28 @@ invisible(suppressPackageStartupMessages({
   sapply(
     X = c(
       "shiny", "DT", "rlang", "ggplot2", "scales", "purrr", 
-      "dplyr", "tidyr", "glue", "readxl", "stats"
+      "dplyr", "tidyr", "glue", "readxl", "stats", "broom",
+      "ggbeeswarm", "ggpubr", "ggthemes"
     ),
     FUN = library, character.only = TRUE
   )
 }))
+
+ggplot2_themes <- c(
+  paste0("ggplot2::", grep("theme_", ls("package:ggplot2"), value = TRUE), "()"),
+  paste0("ggpubr::", grep("theme_", ls("package:ggpubr"), value = TRUE), "()"),
+  paste0("ggthemes::", grep("theme_", ls("package:ggthemes"), value = TRUE), "()")
+) %>% 
+  setdiff(paste0("ggplot2::theme_", c("get", "set", "replace", "update"), "()")) %>% 
+  setdiff(paste0("ggpubr::theme_", c("cleveland"), "()")) %>% 
+  purrr::set_names(., .) %>% 
+  purrr::map_lgl(
+    function(.x) tryCatch(ggplot2::is.theme(eval(parse(text = .x))), error = function(e) FALSE)
+  ) %>% 
+  which() %>% 
+  names() %>% 
+  purrr::set_names(., gsub(".*::theme_(.*)\\(\\)", "\\1", .)) %>% 
+  gsub("\\(\\)", "", .)
 
 card <- function(title, body, type = "") {
   shiny::tags$div(class = paste("card", type),
@@ -177,9 +194,8 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
       is_any_outlier = .data[["is_outlier_OD"]] | 
         .data[["is_outlier_Intercept"]] | 
         .data[["is_outlier_Slope"]] |
-        (is.na(.data[["fc_sn2_sn1"]]) & !.data[["Step"]] %in% "BLANK") |
-        (is.na(.data[["log2_fc_sn2_sn1"]]) & !.data[["Step"]] %in% "BLANK") |
-        (is.na(.data[["Insulin Secretion (% of content)"]]) & !.data[["Step"]] %in% "BLANK"),
+        (is.na(.data[["fc_sn2_sn1"]]) & !.data[["Step"]] %in% c("BLANK", "LYSAT")) |
+        (is.na(.data[["Insulin Secretion (% of content)"]]) & !.data[["Step"]] %in% c("BLANK", "LYSAT")),
       Sample = gsub("mM ", "mM\n", .data[["Sample"]])
     ) %>% 
     dplyr::group_by(.data[["filename"]], .data[["sheet_name"]]) %>% 
@@ -191,10 +207,41 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
     ) %>% 
     dplyr::arrange(.data[["Type"]], .data[["Target"]]) %>% 
     dplyr::mutate(
-      Type_Target = factor(
-        x = paste0(.data[["Type"]], ": ", .data[["Target"]]), 
-        levels = unique(paste0(.data[["Type"]], ": ", .data[["Target"]]))
-      )
+      Type_Target = gsub("NA: NA", NA, paste0(.data[["Type"]], ": ", .data[["Target"]])),
+      Type_Target = factor(x = Type_Target, levels = unique(Type_Target))
+    )
+}
+
+get_outliers <- function(data, fold_change) {
+  if (!"is_reference_good" %in% colnames(data)) {
+    data <- dplyr::full_join(
+      x = data,
+      y = data %>% 
+        dplyr::filter(Type %in% "Reference") %>% 
+        dplyr::group_by(.data[["filename"]]) %>% 
+        dplyr::summarise(
+          is_reference_good = mean(.data[["fc_sn2_sn1"]], na.rm = TRUE) >= fold_change
+        ) %>% 
+        dplyr::ungroup() %>% 
+        dplyr::select(c("filename", "is_reference_good")),
+      by = "filename"
+    )
+  }
+  data %>% 
+    dplyr::filter(.data[["is_any_outlier"]] | !.data[["is_reference_good"]]) %>% 
+    dplyr::select(c(
+      "filename", "Target", "Condition", 
+      "is_outlier_Intercept", "is_outlier_Slope", 
+      "is_outlier_OD",
+      "is_reference_good"
+    )) %>% 
+    dplyr::distinct() %>% 
+    tidyr::replace_na(list(Target = "BLANK")) %>% 
+    dplyr::group_by(.data[["filename"]]) %>% 
+    dplyr::summarise(
+      "Blank Linearity" = any(.data[["is_outlier_Intercept"]] | .data[["is_outlier_Slope"]]),
+      "Technical Variability (OD)" = any(.data[["is_outlier_OD"]]),
+      "Not Secreting Insulin in Reference" = any(!.data[["is_reference_good"]])
     )
 }
 
@@ -214,6 +261,10 @@ ui <- shiny::navbarPage(
       shiny::column(width = 3, align = "center",
         card(title = "Plot Settings", body = {
           shiny::tagList(
+            shiny::selectInput("ggplot2_theme", label = "Theme", 
+              choices = ggplot2_themes[sort(names(ggplot2_themes))], selected = "ggplot2::theme_light"
+            ),
+            shiny::radioButtons("colour_scale", "Colours", choices = c("Viridis", "Grey"), inline = TRUE),
             shiny::numericInput("font_size", shiny::tags$span("Font Size", shiny::helpText("(pt)")),
               value = 16
             ),
@@ -253,7 +304,7 @@ ui <- shiny::navbarPage(
     )
   ),
   ## Blank tab -------------------------------------------------------------------------------------
-  shiny::tabPanel("Blank Quality-Control", icon = shiny::icon("chart-line"), value = "blank-tab", 
+  shiny::tabPanel("Technical Quality-Control", icon = shiny::icon("chart-line"), value = "blank-tab", 
     shiny::sidebarLayout(
       shiny::sidebarPanel(width = 3, 
         shiny::tags$div(align = "center", 
@@ -308,6 +359,8 @@ ui <- shiny::navbarPage(
     shiny::sidebarLayout(
       shiny::sidebarPanel(width = 3, 
         shiny::tags$div(align = "center", 
+          shiny::actionButton("show_issues", "Show Issues in the Selected Experiments"),
+          shiny::tags$hr(),
           shiny::numericInput("fold_change",
             shiny::tags$span('Threshold to Define "Secretion"',
               shiny::helpText(
@@ -316,10 +369,6 @@ ui <- shiny::navbarPage(
             ),
             value = 1, step = 0.1
           ),
-          shiny::radioButtons("search_by", "Search by", 
-            choices = c("File", "Target"), selected = "File", 
-            inline = TRUE
-          ), 
           shiny::uiOutput("target_ui"),
           shiny::uiOutput("experiment_ui")
         )
@@ -330,7 +379,7 @@ ui <- shiny::navbarPage(
             plotDownloadInputUI("is_ratio_distribution_plot", "Insulin Secretion (SN2/SN1) Distribution")
           ),
           shiny::column(width = 7, align = "center",
-            plotDownloadInputUI("is_foldchange_plot", "Insulin Secretion (SN2/SN1)")
+            plotDownloadInputUI("is_ratio_plot", "Insulin Secretion (SN2/SN1)")
           )
         ),
         shiny::fluidRow(style = "padding-top: 1em;",
@@ -370,26 +419,42 @@ server <- function(input, output, session) {
   })
 
   shiny::observe({
-    shiny::req(input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]])
+    shiny::req(
+      input[["targets_list"]], input[["experiments_list"]],
+      input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]],
+      input[["fold_change"]], input[["font_size"]]
+    )
     purrr::map2(
-      .x = list(
-        "is_ratio_distribution_plot",
-        "is_od_plot", "is_percent_plot", "is_foldchange_plot",
-        "is_plot", "is_logratio_plot"
-      ),
-      .y = list(
-        is_ratio_distribution_plot(),
-        is_od_plot(), is_percent_plot(), is_foldchange_plot(),
-        is_plot(), is_logratio_plot()
-      ),
+      .x = list("is_ratio_distribution_plot", "is_plot", "is_ratio_plot"),
+      .y = list(is_ratio_distribution_plot(), is_plot(), is_ratio_plot()),
       .f = function(.x, .y) {
         plotDownloadInput(
-          id = .x, plot_object = .y, 
-          width = input[["plot_width"]] %||% 16, 
-          height = input[["plot_height"]] %||% 12, 
+          id = .x, plot_object = .y,
+          width = input[["plot_width"]] %||% 16,
+          height = input[["plot_height"]] %||% 12,
           dpi = input[["plot_dpi"]] %||% 120
         )
       }
+    )
+  })
+
+  ggplot2_theme <- shiny::reactive({ 
+    package_theme <- strsplit(input[["ggplot2_theme"]], "::")[[1]]
+    f <- utils::getFromNamespace(package_theme[2], package_theme[1]) 
+    f(base_size = input[["font_size"]])
+  })
+  
+  ggplot2_colour <- shiny::reactive({
+    switch(input[["colour_scale"]],
+      "Viridis" = ggplot2::scale_colour_viridis_d(end = 0.9),
+      "Grey" = ggplot2::scale_colour_grey()
+    )
+  })
+
+  ggplot2_fill <- shiny::reactive({
+    switch(input[["colour_scale"]],
+      "Viridis" = ggplot2::scale_fill_viridis_d(end = 0.9),
+      "Grey" = ggplot2::scale_fill_grey()
     )
   })
 
@@ -500,7 +565,7 @@ server <- function(input, output, session) {
       data = dplyr::bind_rows(shiny::req(xlsx_contents()), dplyr::mutate(shiny::req(xlsx_contents()), Step = "ALL")),
       mapping = ggplot2::aes(x = .data[["Step"]], y = .data[["re_OD"]], colour = .data[["Step"]])
     ) +
-      ggplot2::theme_light(base_size = input[["font_size"]]) +
+      ggplot2_theme() +
       ggplot2::geom_rect(
         data = ~ .x %>% 
           dplyr::distinct(.data[["lower_threshold"]], .data[["upper_threshold"]]) %>%
@@ -539,8 +604,8 @@ server <- function(input, output, session) {
         groupOnX = TRUE
       ) +
       ggplot2::scale_y_continuous(labels = scales::percent) +
-      ggplot2::scale_colour_viridis_d(end = 0.9) +
-      ggplot2::scale_fill_viridis_d(end = 0.9) +
+      ggplot2_colour() +
+      ggplot2_fill() +
       ggplot2::labs(
         x = NULL,
         y = bquote("Relative Error:"~frac((OD[2] - OD[1]), OD[1]))
@@ -553,7 +618,7 @@ server <- function(input, output, session) {
       data = shiny::req(xlsx_contents()),
       mapping = ggplot2::aes(x = .data[["re_OD"]], colour = .data[["Step"]], fill = .data[["Step"]])
     ) +
-      ggplot2::theme_light(base_size = input[["font_size"]]) +
+      ggplot2_theme() +
       ggplot2::geom_rect(
         data = ~ .x %>% 
           dplyr::distinct(.data[["lower_threshold"]], .data[["upper_threshold"]]) %>%
@@ -582,8 +647,8 @@ server <- function(input, output, session) {
       ggplot2::geom_density(mapping = ggplot2::aes(colour = "ALL", fill = "ALL"), alpha = 0.2) +
       ggplot2::scale_x_continuous(labels = scales::percent, expand = ggplot2::expand_scale(mult = c(0, 0))) +
       ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(mult = c(0, 0.05))) +
-      ggplot2::scale_colour_viridis_d(end = 0.9) +
-      ggplot2::scale_fill_viridis_d(end = 0.9) +
+      ggplot2_colour() +
+      ggplot2_fill() +
       ggplot2::labs(
         x = bquote("Relative Error:"~frac((OD[2] - OD[1]), OD[1])),
         y = "Density",
@@ -604,7 +669,7 @@ server <- function(input, output, session) {
         ),
       mapping = ggplot2::aes(x = .data[["term"]], y = .data[["estimate"]], group = .data[["term"]])
     ) +
-      ggplot2::theme_light(base_size = input[["font_size"]]) +
+      ggplot2_theme() +
       ggplot2::geom_rect(
         data = ~ .x %>%
           dplyr::distinct(.data[["term"]], .data[["lower_threshold"]], .data[["upper_threshold"]]) %>%
@@ -642,7 +707,7 @@ server <- function(input, output, session) {
         size = input[["point_size"]],
         groupOnX = TRUE
       ) +
-      ggplot2::scale_colour_viridis_d(end = 0.9) +
+      ggplot2_colour() +
       ggplot2::labs(x = NULL, y = "Estimate") +
       ggplot2::facet_wrap(facets = ggplot2::vars(.data[["term"]]), scales = "free") +
       ggplot2::theme(axis.text.x = ggplot2::element_blank()) +
@@ -659,7 +724,7 @@ server <- function(input, output, session) {
         colour = .data[["filename"]]
       )
     ) +
-      ggplot2::theme_light(base_size = input[["font_size"]]) +
+      ggplot2_theme() +
       ggplot2::geom_point(
         data = ~ dplyr::filter(.x, !(.data[["is_outlier_OD"]] | .data[["is_outlier_Intercept"]] | .data[["is_outlier_Slope"]])),
         shape = 1,
@@ -679,7 +744,7 @@ server <- function(input, output, session) {
         colour = "firebrick2", 
         method = "lm", se = FALSE
       ) +
-      ggplot2::scale_colour_viridis_d(end = 0.9) +
+      ggplot2_colour() +
       ggplot2::scale_x_log10() +
       ggplot2::scale_y_log10() +
       ggplot2::labs(
@@ -692,13 +757,11 @@ server <- function(input, output, session) {
   
   ## Analysis tab ----------------------------------------------------------------------------------
   output$target_ui <- shiny::renderUI({
-    column_to_select <- c("File" = "filename", "Target" = "Target")[shiny::req(input[["search_by"]])]
-    
     xlsx_contents_subset <- dplyr::filter(shiny::req(xlsx_contents()), Step != "BLANK")
     
-    shiny::selectInput("targets_list", paste0("Available ", input[["search_by"]], "s"),
-      choices = unique(xlsx_contents_subset[[column_to_select]]),
-      selected = if (input[["search_by"]] == "File") unique(xlsx_contents_subset[[column_to_select]]) else NULL,
+    shiny::selectInput("targets_list", "Available Files",
+      choices = unique(xlsx_contents_subset[["filename"]]),
+      selected = unique(xlsx_contents_subset[["filename"]]),
       width = "100%",
       selectize = FALSE,
       multiple = TRUE,
@@ -707,12 +770,10 @@ server <- function(input, output, session) {
   })
   
   output$experiment_ui <- shiny::renderUI({ 
-    column_to_select <- c("File" = "filename", "Target" = "Target")[shiny::req(input[["search_by"]])]
-    
     experiments_list <- shiny::req(xlsx_contents()) %>% 
       dplyr::mutate(experiment_file = glue::glue("{Target} ({filename})")) %>% 
       dplyr::filter(
-        .data[[column_to_select]] %in% shiny::req(input[["targets_list"]]), 
+        .data[["filename"]] %in% shiny::req(input[["targets_list"]]), 
         !.data[["Step"]] %in% "BLANK"
       )
       
@@ -726,42 +787,39 @@ server <- function(input, output, session) {
     )
   })
   
-  xlsx_contents_is <- shiny::reactive({
-    file_selected <- gsub("^.*\\((.*)\\)$", "\\1", shiny::req(input[["experiments_list"]]))
-    if (length(file_selected) > 0) {
-      out <- xlsx_contents() %>%
-        dplyr::mutate(experiment_file = glue::glue("{Target} ({filename})")) %>%
-        dplyr::filter(
-          (.data[["Step"]] %in% "BLANK" & .data[["filename"]] %in% !!file_selected) |
-            (.data[["Type"]] %in% "Control" & .data[["filename"]] %in% !!file_selected) |
-            .data[["experiment_file"]] %in% !!input[["experiments_list"]]
-        ) %>% 
-        dplyr::filter(!.data[["is_any_outlier"]])
-    } else {
-      out <- dplyr::filter(xlsx_contents(), !.data[["is_any_outlier"]])
-    }
-  })
-  
   xlsx_contents_selected <- shiny::reactive({
-    list_exp_with_is <- shiny::req(xlsx_contents_is()) %>% 
-      dplyr::filter(Type %in% "Reference") %>% 
-      dplyr::group_by(.data[["filename"]]) %>% 
-      dplyr::summarise(
-        is_reference_good = mean(.data[["fc_sn2_sn1"]], na.rm = TRUE) >= shiny::req(input[["fold_change"]])
-      ) %>% 
-      dplyr::ungroup() %>% 
-      dplyr::filter(.data[["is_reference_good"]])
-  
-    dplyr::filter(xlsx_contents_is(),
-      .data[["filename"]] %in% !!list_exp_with_is[["filename"]]
-    )
+    experiments_list <- xlsx_contents() %>% 
+      dplyr::filter(
+        .data[["filename"]] %in% input[["targets_list"]], 
+        !.data[["Step"]] %in% "BLANK"
+      )
+    
+    dplyr::full_join(
+      x = experiments_list,
+      y = experiments_list %>% 
+        dplyr::filter(Type %in% "Reference") %>% 
+        dplyr::group_by(.data[["filename"]]) %>% 
+        dplyr::summarise(
+          is_reference_good = mean(.data[["fc_sn2_sn1"]], na.rm = TRUE) >= input[["fold_change"]]
+        ) %>% 
+        dplyr::ungroup() %>% 
+        dplyr::select(c("filename", "is_reference_good")),
+      by = "filename"
+    ) %>% 
+      dplyr::mutate(
+        experiment_file = glue::glue("{Target} ({filename})"),
+        keep = .data[["experiment_file"]] %in% !!input[["experiments_list"]]
+      )
   })
-  
+
   is_ratio_distribution_plot <- shiny::reactive({
-    if (nrow(shiny::req(xlsx_contents_selected())) == 0) {
+    shiny::req(length(intersect(input[["experiments_list"]], xlsx_contents_selected()[["experiment_file"]])) != 0)
+    xlsx_contents_selected <- dplyr::filter(xlsx_contents_selected(), !.data[["is_any_outlier"]])
+
+    if (nrow(xlsx_contents_selected) == 0) {
       return(
         ggplot2::ggplot() +
-          ggplot2::theme_light(base_size = input[["font_size"]]) +
+          ggplot2_theme() +
           ggplot2::labs(
             x = NULL,
             y = bquote(atop("Insulin Secretion", group("(", "SN2"/"SN1", ")"))),
@@ -775,18 +833,18 @@ server <- function(input, output, session) {
           ggplot2::theme(axis.text = ggplot2::element_blank())
       )
     }
-    
-    fc_threshold <- shiny::req(input[["fold_change"]])
-    
-    gg_data <- shiny::req(xlsx_contents_is()) %>% 
+
+    fc_threshold <- input[["fold_change"]]
+
+    gg_data <- xlsx_contents_selected %>%
       dplyr::filter(
         .data[["Type"]] %in% "Reference",
         !.data[["is_any_outlier"]],
         .data[["Step"]] %in% "SN2"
-      ) %>% 
-      dplyr::select(c("filename", "Type_Target", "fc_sn2_sn1")) %>% 
+      ) %>%
+      dplyr::select(c("filename", "Type_Target", "fc_sn2_sn1")) %>%
       dplyr::mutate(facet_file = gsub(".xlsx$", "", gsub("_", "\n", .data[["filename"]])))
-    
+
     ggplot2::ggplot(
       data = gg_data,
       mapping = ggplot2::aes(
@@ -796,7 +854,7 @@ server <- function(input, output, session) {
         fill = .data[["Type_Target"]]
       )
     ) +
-      ggplot2::theme_light(base_size = input[["font_size"]]) +
+      ggplot2_theme() +
       ggplot2::geom_rect(
         data = dplyr::tibble(ymax = fc_threshold),
         mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = .data[["ymax"]]),
@@ -822,22 +880,31 @@ server <- function(input, output, session) {
       ggplot2::geom_violin(alpha = 0.2) +
       ggbeeswarm::geom_quasirandom(shape = 1) +
       ggplot2::scale_y_continuous(limits = c(0, NA), expand = ggplot2::expand_scale(mult = c(0, 0.05))) +
-      ggplot2::scale_colour_viridis_d(end = 0.9) +
-      ggplot2::scale_fill_viridis_d(end = 0.9) +
+      ggplot2_colour() +
+      ggplot2_fill() +
       ggplot2::labs(
         x = NULL,
         y = bquote(atop("Insulin Secretion", group("(", "SN2"/"SN1", ")"))),
         colour = NULL,
-        fill = NULL
+        fill = NULL,
+        caption = if (all(xlsx_contents_selected[["is_reference_good"]])) {
+          NULL
+        } else {
+          "Warning: Reference is not secreting insulin in one or several experiments!"
+        }
       ) +
-      ggplot2::theme(legend.position = "none")
+      ggplot2::theme(legend.position = "none") +
+      ggplot2::theme(plot.caption = ggplot2::element_text(colour = "firebrick2"))
   })
 
   is_od_plot <- shiny::reactive({
-    if (nrow(shiny::req(xlsx_contents_selected())) == 0) {
+    shiny::req(length(intersect(input[["experiments_list"]], xlsx_contents_selected()[["experiment_file"]])) != 0)
+    xlsx_contents_selected <- dplyr::filter(xlsx_contents_selected(), .data[["keep"]] & !.data[["is_any_outlier"]])
+
+    if (nrow(xlsx_contents_selected) == 0) {
       return(
         ggplot2::ggplot() +
-          ggplot2::theme_light(base_size = input[["font_size"]]) +
+          ggplot2_theme() +
           ggplot2::labs(
             x = NULL,
             y = "Normalised Optical Density\n(OD)"
@@ -849,54 +916,65 @@ server <- function(input, output, session) {
           ggplot2::theme(axis.text = ggplot2::element_blank())
       )
     }
-    
+
     ggplot2::ggplot(
-      data = tidyr::drop_na(xlsx_contents_selected(), .data[["Type"]], .data[["Target"]]),
+      data = xlsx_contents_selected %>%
+        dplyr::select(c("Sample", "Step", "Type_Target", "normalised_OD", "Date", "Operator")) %>%
+        dplyr::distinct(),
       mapping = ggplot2::aes(
-        x = .data[["Sample"]], 
-        y = .data[["normalised_OD"]], 
-        colour = .data[["Type_Target"]], 
+        x = paste0(.data[["Step"]], "\n", .data[["Sample"]]),
+        y = .data[["normalised_OD"]],
+        colour = .data[["Type_Target"]],
         fill = .data[["Type_Target"]],
         group = .data[["Type_Target"]]
       )
     ) +
-      ggplot2::theme_light(base_size = input[["font_size"]]) +
+      ggplot2_theme() +
       ggplot2::geom_errorbar(
         stat = "summary",
         fun.data = "mean_se",
         position = ggplot2::position_dodge(width = 0.9),
-        width = 0.25, 
-        show.legend = FALSE, 
+        width = 0.25,
+        show.legend = FALSE,
         na.rm = TRUE
       ) +
       ggplot2::geom_bar(stat = "summary", fun.y = mean, position = ggplot2::position_dodge(width = 0.9)) +
       ggplot2::geom_label(
-        stat = "summary", 
+        stat = "summary",
         fun.data = function(x) {
           x <- stats::na.omit(x)
           data.frame(y = mean(x)/2, label = length(x))
-        }, 
+        },
         position = ggplot2::position_dodge(width = 0.9),
-        fill = "white", 
+        fill = "white",
         colour = "black",
         show.legend = FALSE
       ) +
-      ggplot2::scale_colour_viridis_d(end = 0.9) +
-      ggplot2::scale_fill_viridis_d(end = 0.9) +
+      ggplot2_colour() +
+      ggplot2_fill() +
       ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(mult = c(0, 0.05))) +
       ggplot2::labs(
         x = NULL,
         y = "Normalised Optical Density\n(OD)",
         colour = NULL,
-        fill = NULL
-      )
+        fill = NULL,
+        caption = if (all(xlsx_contents_selected[["is_reference_good"]])) {
+          NULL
+        } else {
+          "Warning: Reference is not secreting insulin in one or several experiments!"
+        }
+      ) +
+      ggplot2::theme(plot.caption = ggplot2::element_text(colour = "firebrick2"))
   })
 
   is_percent_plot <- shiny::reactive({
-    if (nrow(shiny::req(xlsx_contents_selected())) == 0) {
+    shiny::req(length(intersect(input[["experiments_list"]], xlsx_contents_selected()[["experiment_file"]])) != 0)
+    xlsx_contents_selected <- dplyr::filter(xlsx_contents_selected(), .data[["keep"]] & !.data[["is_any_outlier"]])
+
+    if (nrow(xlsx_contents_selected) == 0) {
       return(
         ggplot2::ggplot() +
-          ggplot2::theme_light(base_size = input[["font_size"]]) +
+          ggplot2_theme() +
           ggplot2::labs(
             x = NULL,
             y = "Insulin Secretion\n(% of content)",
@@ -910,24 +988,23 @@ server <- function(input, output, session) {
           ggplot2::theme(axis.text = ggplot2::element_blank())
       )
     }
-    
+
     ggplot2::ggplot(
-      data = xlsx_contents_selected() %>% 
+      data = xlsx_contents_selected %>%
         dplyr::filter(Step %in% c("SN1", "SN2")) %>% 
-        tidyr::drop_na(.data[["Type"]], .data[["Target"]]) %>% 
-        dplyr::select(c("Sample", "Type_Target", "Insulin Secretion (% of content)")) %>% 
+        dplyr::select(c("Sample", "Type_Target", "Insulin Secretion (% of content)", "Date", "Operator")) %>%
         dplyr::distinct(),
       mapping = ggplot2::aes(
-        x = .data[["Sample"]], 
+        x = .data[["Sample"]],
         y = .data[["Insulin Secretion (% of content)"]],
-        colour = .data[["Type_Target"]], 
+        colour = .data[["Type_Target"]],
         fill = .data[["Type_Target"]]
       )
     ) +
-      ggplot2::theme_light(base_size = input[["font_size"]]) +
+      ggplot2_theme() +
       ggplot2::geom_boxplot(
-        outlier.shape = NA, 
-        alpha = 0.2, 
+        outlier.shape = NA,
+        alpha = 0.2,
         position = ggplot2::position_dodge(width = 0.9),
         na.rm = TRUE
       ) +
@@ -937,26 +1014,35 @@ server <- function(input, output, session) {
         position = ggplot2::position_jitterdodge(dodge.width = 0.9, jitter.width = 0.25),
         na.rm = TRUE
       ) +
-      ggplot2::scale_colour_viridis_d(end = 0.9) +
-      ggplot2::scale_fill_viridis_d(end = 0.9) +
+      ggplot2_colour() +
+      ggplot2_fill() +
       ggplot2::scale_y_continuous(
         labels = scales::percent,
-        limits = c(0, NA), 
+        limits = c(0, NA),
         expand = ggplot2::expand_scale(mult = c(0, 0.05))
       ) +
       ggplot2::labs(
         x = NULL,
         y = "Insulin Secretion\n(% of content)",
         colour = NULL,
-        fill = NULL
-      )
+        fill = NULL,
+        caption = if (all(xlsx_contents_selected[["is_reference_good"]])) {
+          NULL
+        } else {
+          "Warning: Reference is not secreting insulin in one or several experiments!"
+        }
+      ) +
+      ggplot2::theme(plot.caption = ggplot2::element_text(colour = "firebrick2"))
   })
 
-  is_logratio_plot <- shiny::reactive({
-    if (nrow(shiny::req(xlsx_contents_selected())) == 0) {
+  is_ratio_plot <- shiny::reactive({
+    shiny::req(length(intersect(input[["experiments_list"]], xlsx_contents_selected()[["experiment_file"]])) != 0)
+    xlsx_contents_selected <- dplyr::filter(xlsx_contents_selected(), .data[["keep"]] & !.data[["is_any_outlier"]])
+
+    if (nrow(xlsx_contents_selected) == 0) {
       return(
         ggplot2::ggplot() +
-          ggplot2::theme_light(base_size = input[["font_size"]]) +
+          ggplot2_theme() +
           ggplot2::labs(
             x = NULL,
             y = bquote(atop("Insulin Secretion", group("(", "SN2"/"SN1", ")")))
@@ -968,44 +1054,112 @@ server <- function(input, output, session) {
           ggplot2::theme(axis.text = ggplot2::element_blank())
       )
     }
-    
+
+    gg_data <- xlsx_contents_selected %>%
+      tidyr::drop_na(.data[["Type"]], .data[["Target"]]) %>%
+      dplyr::select(c("Condition", "Type_Target", "fc_sn2_sn1", "Date", "Operator")) %>%
+      dplyr::distinct() %>%
+      tidyr::drop_na(.data[["fc_sn2_sn1"]])
+
+    if (length(unique(gg_data[["Type_Target"]])) > 1) {
+      lm_data <- gg_data %>%
+        dplyr::group_by(.data[["Condition"]]) %>%
+        tidyr::nest() %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(
+          lm = purrr::map(.x = .data[["data"]], .f = function(data) {
+            if (length(unique(data[["Type_Target"]])) > 1) {
+              purrr::map2_df(
+                .x = combn(levels(droplevels(data[["Type_Target"]])), 2, simplify = FALSE),
+                .y = list(data),
+                .f = function(x, data) {
+                  mult <- 1.5
+                  splitted_data <- dplyr::filter(data, .data[["Type_Target"]] %in% x)
+                  mean_se_fc <- splitted_data %>%
+                    dplyr::group_by(.data[["Type_Target"]]) %>%
+                    dplyr::summarise(
+                      mean_se = mean(.data[["fc_sn2_sn1"]]) +
+                        sqrt(stats::var(.data[["fc_sn2_sn1"]]) / length(.data[["fc_sn2_sn1"]]))
+                    ) %>%
+                    dplyr::ungroup()
+  
+                  default_formula <- fc_sn2_sn1 ~ Type_Target
+                  if (length(unique(splitted_data[["Date"]])) > 1) {
+                    splitted_data[["Date"]] <- as.factor(splitted_data[["Date"]])
+                    default_formula <- update.formula(default_formula, . ~ . + Date)
+                  }
+                  if (length(unique(splitted_data[["Operator"]])) > 1) {
+                    splitted_data[["Operator"]] <- as.factor(splitted_data[["Operator"]])
+                    default_formula <- update.formula(default_formula, . ~ . + Operator)
+                  }
+                  lm(default_formula, data = splitted_data) %>%
+                    broom::tidy() %>%
+                    dplyr::filter(grepl("Type_Target", .data[["term"]])) %>%
+                    dplyr::mutate(
+                      group1 = levels(droplevels(splitted_data[["Type_Target"]]))[1],
+                      group2 = levels(droplevels(splitted_data[["Type_Target"]]))[2],
+                      y_position = max(mean_se_fc[["mean_se"]]),
+                      term = NULL
+                    )
+                }
+              ) %>%
+                dplyr::mutate_at(
+                  .vars = dplyr::vars(dplyr::num_range("group", 1:2)),
+                  .funs = ~ factor(.x, levels = levels(data[["Type_Target"]]))
+                )
+            }
+          }),
+          data = NULL
+        ) %>%
+        tidyr::unnest("lm") %>%
+        dplyr::group_by(.data[["Condition"]]) %>%
+        dplyr::mutate(
+          group = 1:dplyr::n(),
+          y_position = max(.data[["y_position"]]),
+          y_position = .data[["y_position"]] + c(0.5 * .data[["group"]]),
+          annotations = paste("p =", format.pval(.data[["p.value"]], digits = 3))
+        ) %>%
+        dplyr::ungroup() %>%
+        tidyr::drop_na(.data[["p.value"]])
+    }
+
     ggplot2::ggplot(
-      data = xlsx_contents_selected() %>% 
-        tidyr::drop_na(.data[["Type"]], .data[["Target"]]) %>%
-        dplyr::select(c("Condition", "Type_Target", "fc_sn2_sn1")) %>% 
-        dplyr::distinct(),
+      data = gg_data,
       mapping = ggplot2::aes(
-        x = .data[["Condition"]], 
+        x = .data[["Type_Target"]],
         y = .data[["fc_sn2_sn1"]],
-        colour = .data[["Type_Target"]], 
+        colour = .data[["Type_Target"]],
         fill = .data[["Type_Target"]],
         group = .data[["Type_Target"]]
       )
     ) +
-      ggplot2::theme_light(base_size = input[["font_size"]]) +
+      ggplot2_theme() +
       ggplot2::geom_hline(yintercept = 1, linetype = 2) +
       ggplot2::geom_errorbar(
         stat = "summary",
         fun.data = "mean_se",
         position = ggplot2::position_dodge(width = 0.9),
-        width = 0.25, 
-        show.legend = FALSE, 
+        width = 0.25,
+        show.legend = FALSE,
         na.rm = TRUE
       ) +
       ggplot2::geom_bar(stat = "summary", fun.y = mean, position = ggplot2::position_dodge(width = 0.9)) +
       ggplot2::geom_label(
-        stat = "summary", 
+        stat = "summary",
         fun.data = function(x) {
           x <- stats::na.omit(x)
-          data.frame(y = mean(x)/2, label = length(x))
-        }, 
+          se <- sqrt(stats::var(x)/length(x))
+          mean <- mean(x)
+          data.frame(y = mean, label = length(x))
+        },
         position = ggplot2::position_dodge(width = 0.9),
-        fill = "white", 
+        fill = "white",
         colour = "black",
-        show.legend = FALSE
+        show.legend = FALSE,
+        vjust = 1.25
       ) +
-      ggplot2::scale_colour_viridis_d(end = 0.9) +
-      ggplot2::scale_fill_viridis_d(end = 0.9) +
+      ggplot2_colour() +
+      ggplot2_fill() +
       ggplot2::scale_y_continuous(
         expand = ggplot2::expand_scale(mult = c(0, 0.05))
       ) +
@@ -1013,20 +1167,54 @@ server <- function(input, output, session) {
         x = NULL,
         y = bquote(atop("Insulin Secretion", group("(", "SN2"/"SN1", ")"))),
         colour = NULL,
-        fill = NULL
-      )
+        fill = NULL,
+        caption = if (all(xlsx_contents_selected[["is_reference_good"]])) {
+          NULL
+        } else {
+          "Warning: Reference is not secreting insulin in one or several experiments!"
+        }
+      ) +
+      {
+        if (nrow(lm_data) > 0 & length(unique(gg_data[["Type_Target"]])) > 1) {
+          ggsignif::geom_signif(
+            data = dplyr::mutate(lm_data, group = 1:dplyr::n()),
+            mapping = ggplot2::aes(
+              y_position = .data[["y_position"]],
+              xmin = .data[["group1"]], xmax = .data[["group2"]],
+              annotations = .data[["annotations"]],
+              group = .data[["group"]]
+            ),
+            manual = TRUE,
+            tip_length = 0,
+            inherit.aes = FALSE
+          )
+        }
+      } +
+      ggplot2::facet_grid(cols = ggplot2::vars(!!ggplot2::sym("Condition"))) +
+      ggplot2::theme(legend.position = "none") +
+      ggplot2::theme(plot.caption = ggplot2::element_text(colour = "firebrick2"))
   })
-  
+
   is_plot <- shiny::reactive({
     ggpubr::ggarrange(
-      is_od_plot(), is_percent_plot(), #is_logratio_plot(), 
-      nrow = 1, ncol = 2, align = "v", 
+      is_od_plot(), is_percent_plot(), #is_ratio_plot(),
+      nrow = 1, ncol = 2, align = "v",
       legend = "top", common.legend = TRUE
     )
   })
   
-  is_foldchange_plot <- shiny::reactive({
-    is_logratio_plot()
+  shiny::observeEvent(input[["show_issues"]], {
+    shiny::showModal(shiny::modalDialog(size = "l", easyClose = TRUE,
+      title = "Issues Detected in the Selected Experiments",
+      {
+        list_issues <- get_outliers(dplyr::filter(xlsx_contents_selected(), .data[["keep"]]), input[["fold_change"]])
+        if (nrow(list_issues)==0) {
+          shiny::tags$p("No issues currently detected in the selected experiments.")
+        } else {
+          DT::renderDataTable({ list_issues })
+        }
+      }
+    ))
   })
   
   
@@ -1040,18 +1228,7 @@ server <- function(input, output, session) {
   })
   
   outliers_list <- shiny::reactive({
-    columns_outliers <- c(
-      "filename", "Target", "Type", "Step", "Condition", 
-      'Blank "Intercept" outlier' = "is_outlier_Intercept", 
-      'Blank "Slope" outlier' = "is_outlier_Slope", 
-      "OD outlier" = "is_outlier_OD",
-      "Excluded" = "is_any_outlier"
-    )
-    shiny::req(xlsx_contents()) %>% 
-      dplyr::filter(.data[["is_any_outlier"]]) %>% 
-      dplyr::select(!!columns_outliers) %>% 
-      dplyr::distinct() %>% 
-      dplyr::arrange(.data[["filename"]], .data[["Type"]], .data[["Target"]], .data[["Condition"]])
+    get_outliers(xlsx_contents(), input[["fold_change"]])
   })
   
   output$outliers <- DT::renderDataTable({ outliers_list() })
