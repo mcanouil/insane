@@ -17,4 +17,5 @@ Imports:
     scales,
     shiny,
     stats,
-    tidyr
+    tidyr,
+    utils
