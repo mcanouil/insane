@@ -5,7 +5,7 @@ invisible(suppressPackageStartupMessages({
     X = c(
       "shiny", "DT", "rlang", "ggplot2", "scales", "purrr", 
       "dplyr", "tidyr", "glue", "readxl", "stats", "broom",
-      "ggbeeswarm", "ggpubr", "ggthemes"
+      "ggbeeswarm", "ggpubr", "ggthemes", "utils"
     ),
     FUN = library, character.only = TRUE
   )
