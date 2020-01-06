@@ -585,7 +585,7 @@ server <- function(input, output, session) {
   output$project_ui <- shiny::renderUI({
     shiny::selectInput("project_name", "Available Projects",
       choices = unique(xlsx_available()[["Project"]]),
-      selected = isolate(input[["project_name"]]),
+      selected = shiny::isolate(input[["project_name"]]),
       width = "90%",
       selectize = FALSE,
       multiple = FALSE
@@ -1142,7 +1142,7 @@ server <- function(input, output, session) {
           lm = purrr::map(.x = .data[["data"]], .f = function(data) {
             if (length(unique(data[["Type_Target"]])) > 1) {
               purrr::map2_df(
-                .x = combn(levels(droplevels(data[["Type_Target"]])), 2, simplify = FALSE),
+                .x = utils::combn(levels(droplevels(data[["Type_Target"]])), 2, simplify = FALSE),
                 .y = list(data),
                 .f = function(x, data) {
                   mult <- 1.5
@@ -1158,13 +1158,13 @@ server <- function(input, output, session) {
                   default_formula <- fc_sn2_sn1 ~ Type_Target
                   if (length(unique(splitted_data[["Date"]])) > 1) {
                     splitted_data[["Date"]] <- as.factor(splitted_data[["Date"]])
-                    default_formula <- update.formula(default_formula, . ~ . + Date)
+                    default_formula <- stats::update.formula(default_formula, . ~ . + Date)
                   }
                   if (length(unique(splitted_data[["Operator"]])) > 1) {
                     splitted_data[["Operator"]] <- as.factor(splitted_data[["Operator"]])
-                    default_formula <- update.formula(default_formula, . ~ . + Operator)
+                    default_formula <- stats::update.formula(default_formula, . ~ . + Operator)
                   }
-                  lm(default_formula, data = splitted_data) %>%
+                  stats::lm(default_formula, data = splitted_data) %>%
                     broom::tidy() %>%
                     dplyr::filter(grepl("Type_Target", .data[["term"]])) %>%
                     dplyr::mutate(
