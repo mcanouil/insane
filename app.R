@@ -261,24 +261,44 @@ ui <- shiny::navbarPage(
       shiny::column(width = 3, align = "center",
         card(title = "Plot Settings", body = {
           shiny::tagList(
-            shiny::selectInput("ggplot2_theme", label = "Theme", 
+            shiny::selectInput("ggplot2_theme", "Theme", 
               choices = ggplot2_themes[sort(names(ggplot2_themes))], selected = "ggplot2::theme_light"
             ),
-            shiny::radioButtons("colour_scale", "Colours", choices = c("Viridis", "Grey"), inline = TRUE),
-            shiny::numericInput("font_size", shiny::tags$span("Font Size", shiny::helpText("(pt)")),
-              value = 16
+            shiny::radioButtons("colour_scale", shiny::tags$span("Colour Palette", shiny::helpText('(No effect on "thresholds areas")')), 
+              choices = c("Viridis", "Plasma", "Magma", "Inferno", "Grey"),
+              inline = TRUE
             ),
-            shiny::numericInput("point_size", shiny::tags$span("Point Size", shiny::helpText("(mm)")),
-              value = 2,
-              min = 0, max = 4, step = 0.5
+            shiny::sliderInput("colour_scale_range", shiny::tags$span("Limits of the Colour Palette", shiny::helpText("(Dark to Bright)")), 
+              min = 0, max = 1, 
+              value = c(0, 0.85), 
+              step = 0.05
             ),
-            shiny::numericInput("plot_width", shiny::tags$span("Width", shiny::helpText("(cm)")),
-              value = 16
+            shiny::fluidRow(
+              shiny::column(width = 6,
+                shiny::numericInput("font_size", shiny::tags$span("Font Size", shiny::helpText("(pt)")),
+                  value = 16
+                )
+              ),
+              shiny::column(width = 6,
+                shiny::numericInput("point_size", shiny::tags$span("Point Size", shiny::helpText("(mm)")),
+                  value = 2,
+                  min = 0, max = 4, step = 0.5
+                )
+              )
             ),
-            shiny::numericInput("plot_height", shiny::tags$span("Height", shiny::helpText("(cm)")),
-              value = 12
+            shiny::fluidRow(
+              shiny::column(width = 6,
+                shiny::numericInput("plot_width", shiny::tags$span("Width", shiny::helpText("(cm)")),
+                  value = 16
+                )
+              ),
+              shiny::column(width = 6,
+                shiny::numericInput("plot_height", shiny::tags$span("Height", shiny::helpText("(cm)")),
+                  value = 12
+                )
+              )
             ),
-            shiny::numericInput("plot_dpi", shiny::tags$span("DPI", shiny::helpText("(Default: 120)")),
+            shiny::numericInput("plot_dpi", shiny::tags$span("Resolution", shiny::helpText("(ppi)")),
               value = 120
             )
           )
@@ -468,17 +488,33 @@ server <- function(input, output, session) {
   })
   
   ggplot2_colour <- shiny::reactive({
-    switch(input[["colour_scale"]],
-      "Viridis" = ggplot2::scale_colour_viridis_d(end = 0.9),
-      "Grey" = ggplot2::scale_colour_grey()
-    )
+    if (input[["colour_scale"]] == "Grey") {
+      ggplot2::scale_colour_grey(
+        start = input[["colour_scale_range"]][1], 
+        end = input[["colour_scale_range"]][2]
+      )
+    } else {
+      ggplot2::scale_colour_viridis_d(
+        option = tolower(input[["colour_scale"]]), 
+        begin = input[["colour_scale_range"]][1], 
+        end = input[["colour_scale_range"]][2]
+      )
+    }
   })
 
   ggplot2_fill <- shiny::reactive({
-    switch(input[["colour_scale"]],
-      "Viridis" = ggplot2::scale_fill_viridis_d(end = 0.9),
-      "Grey" = ggplot2::scale_fill_grey()
-    )
+    if (input[["colour_scale"]] == "Grey") {
+      ggplot2::scale_fill_grey(
+        start = input[["colour_scale_range"]][1], 
+        end = input[["colour_scale_range"]][2]
+      )
+    } else {
+      ggplot2::scale_fill_viridis_d(
+        option = tolower(input[["colour_scale"]]), 
+        begin = input[["colour_scale_range"]][1], 
+        end = input[["colour_scale_range"]][2]
+      )
+    }
   })
 
   ## Upload tab ------------------------------------------------------------------------------------
