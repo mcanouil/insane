@@ -253,7 +253,7 @@ ui <- shiny::navbarPage(
   title = "EndoC-βH1",
   windowTitle = "EndoC-βH1",
   collapsible = TRUE,
-  id = "main-menu",
+  id = "main_menu",
   selected = "upload-tab",
   ## Upload tab ------------------------------------------------------------------------------------
   shiny::tabPanel("Upload Experiments & Plot Settings", icon = shiny::icon("file-upload"), value = "upload-tab",
@@ -399,7 +399,10 @@ ui <- shiny::navbarPage(
 # Server-side ======================================================================================
 server <- function(input, output, session) {
   shiny::observe({
-    shiny::req(input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]])
+    shiny::req(
+      input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]],
+      od_box_plot(), od_density_plot(), od_lm_box_plot(), od_lm_line_plot()
+    )
     purrr::map2(
       .x = list(
         "od_box_plot", "od_density_plot", "od_lm_box_plot", "od_lm_line_plot"
@@ -422,7 +425,8 @@ server <- function(input, output, session) {
     shiny::req(
       input[["targets_list"]], input[["experiments_list"]],
       input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]],
-      input[["fold_change"]], input[["font_size"]]
+      input[["fold_change"]], input[["font_size"]],
+      is_ratio_distribution_plot(), is_plot(), is_ratio_plot()
     )
     purrr::map2(
       .x = list("is_ratio_distribution_plot", "is_plot", "is_ratio_plot"),
@@ -436,6 +440,25 @@ server <- function(input, output, session) {
         )
       }
     )
+  })
+  
+  shiny::observe({
+    if (length(xlsx_available()[["file"]]) == 0) {
+      purrr::map(
+        .x = c("blank", "is_analysis", "outliers"),
+        .f = ~ shiny::hideTab("main_menu", target = paste0(.x, "-tab"))
+      )
+    } else {
+      purrr::map(
+        .x = c("blank", "is_analysis"),
+        .f = ~ shiny::showTab("main_menu", target = paste0(.x, "-tab"))
+      )
+      if (nrow(outliers_list()) == 0) {
+        shiny::hideTab("main_menu", target = "outliers-tab")
+      } else {
+        shiny::showTab("main_menu", target = "outliers-tab")
+      }
+    }
   })
 
   ggplot2_theme <- shiny::reactive({ 
@@ -464,24 +487,30 @@ server <- function(input, output, session) {
     content = function(file) file.copy(file.path("www", "template.xlsx"), file, overwrite = TRUE)
   )
   
-  output$xlsx_contents_summary <- shiny::renderUI({
-    xlsx_size <- sum(input$xlsx_files[, "size"])
-    class(xlsx_size) <- "object_size"
-    shiny::tags$p(
-      "A total of", shiny::tags$strong(length(input$xlsx_files[, "name"])), 
-      if (nrow(input$xlsx_files) > 1) {
-        "Excel files were succesfully uploaded,"
-      } else {
-        "Excel file was succesfully uploaded,"
-      },
-      "for a total amount of", shiny::tags$strong(format(xlsx_size, units = "Kb"), .noWS = "after"), "."
-    )
+  xlsx_contents_summary <- shiny::reactive({
+    if (!is.null(input[["xlsx_files"]]) && nrow(input[["xlsx_files"]]) > 0) {
+      purrr::pmap(input[["xlsx_files"]], function(name, size, type, datapath) {
+        file.copy(datapath, to = file.path("www", "xlsx", name), overwrite = TRUE)
+      })
+      xlsx_size <- sum(input$xlsx_files[, "size"])
+      class(xlsx_size) <- "object_size"
+      shiny::tags$p(
+        "A total of", shiny::tags$strong(length(input$xlsx_files[, "name"])), 
+        if (nrow(input$xlsx_files) > 1) {
+          "Excel files were succesfully uploaded,"
+        } else {
+          "Excel file was succesfully uploaded,"
+        },
+        "for a total amount of", shiny::tags$strong(format(xlsx_size, units = "Kb"), .noWS = "after"), "."
+      )
+    }
   })
   
+  output$xlsx_contents_summary <- shiny::renderUI({ shiny::req(xlsx_contents_summary()) })
+
   xlsx_available <- shiny::reactive({
-    input$xlsx_files
-    
-    dplyr::tibble(file = list.files(path = "www/xlsx", pattern = ".xlsx$", full.names = TRUE)) %>%
+    uploaded_files <- xlsx_contents_summary()
+    dplyr::tibble(file = list.files(path = file.path("www", "xlsx"), pattern = ".xlsx$", full.names = TRUE)) %>%
       dplyr::mutate(sheet_name = purrr::map(.data[["file"]], readxl::excel_sheets)) %>%
       tidyr::unnest(.data[["sheet_name"]]) %>%
       dplyr::mutate(
@@ -504,6 +533,22 @@ server <- function(input, output, session) {
     dplyr::select(shiny::req(xlsx_available()), 
       c("Project", "File" = "filename", "Sheet" = "sheet_name")
     ) 
+  })
+  
+  xlsx_contents <- shiny::reactive({
+    id <- shiny::showNotification(
+      ui = "Data are loading, please wait ...", 
+      duration = NULL, closeButton = FALSE
+    )
+    on.exit(shiny::removeNotification(id), add = TRUE)
+    if (length(xlsx_available()[["file"]]) != 0) {
+      get_xlsx_contents(
+        files = xlsx_available()[["file"]],
+        od_outlier = input[["od_outlier"]] %||% 3, 
+        lm_outlier = input[["lm_outlier"]] %||% 1.5,
+        project_name = input[["project_name"]] %||% NULL
+      )
+    }
   })
   
   output$project_ui <- shiny::renderUI({
@@ -535,34 +580,13 @@ server <- function(input, output, session) {
     )
   })
 
-  xlsx_contents <- shiny::reactive({
-    shiny::req(input[["project_name"]])
-    id <- shiny::showNotification(
-      ui = "Data are loading, please wait ...", 
-      duration = NULL, closeButton = FALSE
-    )
-    on.exit(shiny::removeNotification(id), add = TRUE)
-    if (!is.null(input$xlsx_files)) {
-      purrr::pmap(shiny::req(input$xlsx_files), function(name, size, type, datapath) {
-        file.copy(datapath, to = file.path("www", "xlsx", name), overwrite = TRUE)
-      })
-    }
-    if (length(list.files(file.path("www", "xlsx"), pattern = ".xlsx$")) != 0) {
-      get_xlsx_contents(
-        files = xlsx_available()[["file"]],
-        od_outlier = input[["od_outlier"]] %||% 3, 
-        lm_outlier = input[["lm_outlier"]] %||% 1.5,
-        project_name = input[["project_name"]] %||% NULL
-      )
-    }
-  })
-
 
   ## Blank tab -------------------------------------------------------------------------------------
   
   od_box_plot <- shiny::reactive({
+    shiny::req(xlsx_contents())
     ggplot2::ggplot(
-      data = dplyr::bind_rows(shiny::req(xlsx_contents()), dplyr::mutate(shiny::req(xlsx_contents()), Step = "ALL")),
+      data = dplyr::bind_rows(xlsx_contents(), dplyr::mutate(xlsx_contents(), Step = "ALL")),
       mapping = ggplot2::aes(x = .data[["Step"]], y = .data[["re_OD"]], colour = .data[["Step"]])
     ) +
       ggplot2_theme() +
@@ -614,8 +638,9 @@ server <- function(input, output, session) {
   })
 
   od_density_plot <- shiny::reactive({
+    shiny::req(xlsx_contents())
     ggplot2::ggplot(
-      data = shiny::req(xlsx_contents()),
+      data = xlsx_contents(),
       mapping = ggplot2::aes(x = .data[["re_OD"]], colour = .data[["Step"]], fill = .data[["Step"]])
     ) +
       ggplot2_theme() +
@@ -658,8 +683,9 @@ server <- function(input, output, session) {
   })
   
   od_lm_box_plot <- shiny::reactive({
+    shiny::req(xlsx_contents())
     ggplot2::ggplot(
-      data = shiny::req(xlsx_contents()) %>% 
+      data = xlsx_contents() %>% 
         dplyr::select("filename", dplyr::matches("_Intercept|_Slope")) %>% 
         dplyr::distinct() %>% 
         tidyr::pivot_longer(
@@ -715,8 +741,9 @@ server <- function(input, output, session) {
   })
   
   od_lm_line_plot <- shiny::reactive({
+    shiny::req(xlsx_contents())
     ggplot2::ggplot(
-      data = shiny::req(xlsx_contents()) %>% 
+      data = xlsx_contents() %>% 
         dplyr::filter(.data[["Step"]] == "BLANK" & .data[["Concentration (µg/L)"]] != 0),
       mapping = ggplot2::aes(
         x = .data[["Concentration (µg/L)"]], 
@@ -788,6 +815,8 @@ server <- function(input, output, session) {
   })
   
   xlsx_contents_selected <- shiny::reactive({
+    shiny::req(xlsx_contents())
+    
     experiments_list <- xlsx_contents() %>% 
       dplyr::filter(
         .data[["filename"]] %in% input[["targets_list"]], 
@@ -813,6 +842,7 @@ server <- function(input, output, session) {
   })
 
   is_ratio_distribution_plot <- shiny::reactive({
+    shiny::req(xlsx_contents_selected())
     shiny::req(length(intersect(input[["experiments_list"]], xlsx_contents_selected()[["experiment_file"]])) != 0)
     xlsx_contents_selected <- dplyr::filter(xlsx_contents_selected(), !.data[["is_any_outlier"]])
 
@@ -842,16 +872,15 @@ server <- function(input, output, session) {
         !.data[["is_any_outlier"]],
         .data[["Step"]] %in% "SN2"
       ) %>%
-      dplyr::select(c("filename", "Type_Target", "fc_sn2_sn1")) %>%
+      dplyr::select(c("filename", "Type_Target", "Condition", "fc_sn2_sn1")) %>%
+      dplyr::distinct() %>% 
       dplyr::mutate(facet_file = gsub(".xlsx$", "", gsub("_", "\n", .data[["filename"]])))
 
     ggplot2::ggplot(
       data = gg_data,
       mapping = ggplot2::aes(
         x = .data[["Type_Target"]],
-        y = .data[["fc_sn2_sn1"]],
-        colour = .data[["Type_Target"]],
-        fill = .data[["Type_Target"]]
+        y = .data[["fc_sn2_sn1"]]
       )
     ) +
       ggplot2_theme() +
@@ -876,28 +905,38 @@ server <- function(input, output, session) {
         colour = "black",
         linetype = 3
       ) +
-      ggplot2::geom_boxplot(alpha = 0.2, width = 0.5) +
+      ggplot2::geom_boxplot(alpha = 0.2, width = 0.5, outlier.shape = NA) +
       ggplot2::geom_violin(alpha = 0.2) +
-      ggbeeswarm::geom_quasirandom(shape = 1) +
+      ggbeeswarm::geom_quasirandom(
+        mapping = ggplot2::aes(
+          colour = .data[["Condition"]],
+          fill = .data[["Condition"]],
+          shape = .data[["Condition"]]
+        ),
+        size = input[["point_size"]]
+      ) +
       ggplot2::scale_y_continuous(limits = c(0, NA), expand = ggplot2::expand_scale(mult = c(0, 0.05))) +
       ggplot2_colour() +
       ggplot2_fill() +
+      ggplot2::scale_shape() +
       ggplot2::labs(
         x = NULL,
         y = bquote(atop("Insulin Secretion", group("(", "SN2"/"SN1", ")"))),
-        colour = NULL,
-        fill = NULL,
+        colour = "Condition",
+        fill = "Condition",
+        shape = "Condition",
         caption = if (all(xlsx_contents_selected[["is_reference_good"]])) {
           NULL
         } else {
           "Warning: Reference is not secreting insulin in one or several experiments!"
         }
       ) +
-      ggplot2::theme(legend.position = "none") +
+      # ggplot2::theme(legend.position = "none") +
       ggplot2::theme(plot.caption = ggplot2::element_text(colour = "firebrick2"))
   })
 
   is_od_plot <- shiny::reactive({
+    shiny::req(xlsx_contents_selected())
     shiny::req(length(intersect(input[["experiments_list"]], xlsx_contents_selected()[["experiment_file"]])) != 0)
     xlsx_contents_selected <- dplyr::filter(xlsx_contents_selected(), .data[["keep"]] & !.data[["is_any_outlier"]])
 
@@ -968,6 +1007,7 @@ server <- function(input, output, session) {
   })
 
   is_percent_plot <- shiny::reactive({
+    shiny::req(xlsx_contents_selected())
     shiny::req(length(intersect(input[["experiments_list"]], xlsx_contents_selected()[["experiment_file"]])) != 0)
     xlsx_contents_selected <- dplyr::filter(xlsx_contents_selected(), .data[["keep"]] & !.data[["is_any_outlier"]])
 
@@ -1036,6 +1076,7 @@ server <- function(input, output, session) {
   })
 
   is_ratio_plot <- shiny::reactive({
+    shiny::req(xlsx_contents_selected())
     shiny::req(length(intersect(input[["experiments_list"]], xlsx_contents_selected()[["experiment_file"]])) != 0)
     xlsx_contents_selected <- dplyr::filter(xlsx_contents_selected(), .data[["keep"]] & !.data[["is_any_outlier"]])
 
@@ -1175,7 +1216,7 @@ server <- function(input, output, session) {
         }
       ) +
       {
-        if (nrow(lm_data) > 0 & length(unique(gg_data[["Type_Target"]])) > 1) {
+        if (length(unique(gg_data[["Type_Target"]])) > 1 && nrow(lm_data) > 0) {
           ggsignif::geom_signif(
             data = dplyr::mutate(lm_data, group = 1:dplyr::n()),
             mapping = ggplot2::aes(
@@ -1197,7 +1238,7 @@ server <- function(input, output, session) {
 
   is_plot <- shiny::reactive({
     ggpubr::ggarrange(
-      is_od_plot(), is_percent_plot(), #is_ratio_plot(),
+      is_od_plot(), is_percent_plot(),
       nrow = 1, ncol = 2, align = "v",
       legend = "top", common.legend = TRUE
     )
@@ -1219,16 +1260,8 @@ server <- function(input, output, session) {
   
   
   ## Outliers tab ----------------------------------------------------------------------------------
-  shiny::observe({
-    if (nrow(outliers_list()) == 0) {
-      shiny::hideTab("main-menu", target = "outliers-tab")
-    } else {
-      shiny::showTab("main-menu", target = "outliers-tab")
-    }
-  })
-  
   outliers_list <- shiny::reactive({
-    get_outliers(xlsx_contents(), input[["fold_change"]])
+    get_outliers(shiny::req(xlsx_contents()), input[["fold_change"]])
   })
   
   output$outliers <- DT::renderDataTable({ outliers_list() })
