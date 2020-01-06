@@ -523,8 +523,6 @@ server <- function(input, output, session) {
       res_copy <- purrr::pmap(input[["xlsx_files"]], function(name, size, type, datapath) {
         file.copy(datapath, to = file.path("www", "xlsx", name), overwrite = TRUE)
       })
-      message(getwd())
-      stopifnot(all(res_copy))
       xlsx_size <- sum(input$xlsx_files[, "size"])
       class(xlsx_size) <- "object_size"
       shiny::tags$p(
