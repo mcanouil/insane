@@ -262,7 +262,8 @@ ui <- shiny::navbarPage(
         card(title = "Plot Settings", body = {
           shiny::tagList(
             shiny::selectInput("ggplot2_theme", "Theme", 
-              choices = ggplot2_themes[sort(names(ggplot2_themes))], selected = "ggplot2::theme_light"
+              choices = ggplot2_themes[sort(names(ggplot2_themes))], 
+              selected = grep("light", ggplot2_themes, value = TRUE)
             ),
             shiny::radioButtons("colour_scale", shiny::tags$span("Colour Palette", shiny::helpText('(No effect on "thresholds areas")')), 
               choices = c("Viridis", "Plasma", "Magma", "Inferno", "Grey"),
