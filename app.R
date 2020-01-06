@@ -1,3 +1,5 @@
+dir.create(file.path("www", "xlsx"), showWarnings = FALSE, mode = "0777")
+
 invisible(suppressPackageStartupMessages({
   sapply(
     X = c(
@@ -16,12 +18,6 @@ ggplot2_themes <- c(
 ) %>% 
   setdiff(paste0("ggplot2::theme_", c("get", "set", "replace", "update"), "()")) %>% 
   setdiff(paste0("ggpubr::theme_", c("cleveland"), "()")) %>% 
-  purrr::set_names(., .) %>% 
-  purrr::map_lgl(
-    function(.x) tryCatch(ggplot2::is.theme(eval(parse(text = .x))), error = function(e) FALSE)
-  ) %>% 
-  which() %>% 
-  names() %>% 
   purrr::set_names(., gsub(".*::theme_(.*)\\(\\)", "\\1", .)) %>% 
   gsub("\\(\\)", "", .)
 
@@ -244,8 +240,6 @@ get_outliers <- function(data, fold_change) {
       "Not Secreting Insulin in Reference" = any(!.data[["is_reference_good"]])
     )
 }
-
-dir.create(file.path("www", "xlsx"), showWarnings = FALSE, mode = "0777")
 
 # UI-side ==========================================================================================
 ui <- shiny::navbarPage(
@@ -526,9 +520,11 @@ server <- function(input, output, session) {
   
   xlsx_contents_summary <- shiny::reactive({
     if (!is.null(input[["xlsx_files"]]) && nrow(input[["xlsx_files"]]) > 0) {
-      purrr::pmap(input[["xlsx_files"]], function(name, size, type, datapath) {
+      res_copy <- purrr::pmap(input[["xlsx_files"]], function(name, size, type, datapath) {
         file.copy(datapath, to = file.path("www", "xlsx", name), overwrite = TRUE)
       })
+      message(getwd())
+      stopifnot(all(res_copy))
       xlsx_size <- sum(input$xlsx_files[, "size"])
       class(xlsx_size) <- "object_size"
       shiny::tags$p(
