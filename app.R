@@ -448,8 +448,7 @@ server <- function(input, output, session) {
     shiny::req(
       input[["targets_list"]], input[["experiments_list"]],
       input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]],
-      input[["fold_change"]], input[["font_size"]],
-      is_ratio_distribution_plot(), is_plot(), is_ratio_plot()
+      input[["fold_change"]], input[["font_size"]]
     )
     purrr::map2(
       .x = list("is_ratio_distribution_plot", "is_plot", "is_ratio_plot"),
@@ -1111,6 +1110,14 @@ server <- function(input, output, session) {
       ggplot2::theme(plot.caption = ggplot2::element_text(colour = "firebrick2"))
   })
 
+  is_plot <- shiny::reactive({
+    ggpubr::ggarrange(
+      is_od_plot(), is_percent_plot(),
+      nrow = 1, ncol = 2, align = "v",
+      legend = "top", common.legend = TRUE
+    )
+  })
+  
   is_ratio_plot <- shiny::reactive({
     shiny::req(xlsx_contents_selected())
     shiny::req(length(intersect(input[["experiments_list"]], xlsx_contents_selected()[["experiment_file"]])) != 0)
@@ -1297,14 +1304,6 @@ server <- function(input, output, session) {
       ggplot2::facet_grid(cols = ggplot2::vars(!!ggplot2::sym("Condition"))) +
       ggplot2::theme(legend.position = "none") +
       ggplot2::theme(plot.caption = ggplot2::element_text(colour = "firebrick2"))
-  })
-
-  is_plot <- shiny::reactive({
-    ggpubr::ggarrange(
-      is_od_plot(), is_percent_plot(),
-      nrow = 1, ncol = 2, align = "v",
-      legend = "top", common.legend = TRUE
-    )
   })
   
   shiny::observeEvent(input[["show_issues"]], {
