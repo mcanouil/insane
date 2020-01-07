@@ -422,9 +422,10 @@ ui <- shiny::navbarPage(
 # Server-side ======================================================================================
 server <- function(input, output, session) {
   shiny::observe({
+    pdf(NULL)
     shiny::req(
-      input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]]#,
-      # od_box_plot(), od_density_plot(), od_lm_box_plot(), od_lm_line_plot()
+      input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]],
+      od_box_plot(), od_density_plot(), od_lm_box_plot(), od_lm_line_plot()
     )
     purrr::map2(
       .x = list(
@@ -442,14 +443,16 @@ server <- function(input, output, session) {
         )
       }
     )
+    dev.off()
   })
 
   shiny::observe({
+    pdf(NULL)
     shiny::req(
       input[["targets_list"]], input[["experiments_list"]],
       input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]],
-      input[["fold_change"]], input[["font_size"]]#,
-      # is_ratio_distribution_plot(), is_plot(), is_ratio_plot()
+      input[["fold_change"]], input[["font_size"]],
+      is_ratio_distribution_plot(), is_plot(), is_ratio_plot()
     )
     purrr::map2(
       .x = list("is_ratio_distribution_plot", "is_plot", "is_ratio_plot"),
@@ -463,6 +466,7 @@ server <- function(input, output, session) {
         )
       }
     )
+    dev.off()
   })
   
   shiny::observe({
