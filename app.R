@@ -376,6 +376,14 @@ ui <- shiny::navbarPage(
         shiny::tags$div(align = "center", 
           shiny::actionButton("show_issues", "Show Issues in the Selected Experiments"),
           shiny::tags$hr(),
+          shiny::radioButtons("use_boxplot", "Insulin Secretion Results Plot", 
+            choiceNames = list(
+              shiny::tags$span("Histogram", shiny::helpText("(Bars with mean and sem)")),
+              shiny::tags$span("Boxplot", shiny::helpText("(Boxplot with points)"))
+            ), 
+            choiceValues = c("Histogram", "Boxplot"), 
+            inline = TRUE
+          ),
           shiny::numericInput("fold_change",
             shiny::tags$span('Threshold to Define "Secretion"',
               shiny::helpText(
@@ -391,10 +399,10 @@ ui <- shiny::navbarPage(
       shiny::mainPanel(width = 9,
         shiny::fluidRow(
           shiny::column(width = 5, align = "center",
-            plotDownloadInputUI("is_ratio_distribution_plot", "Insulin Secretion (SN2/SN1) Distribution")
+            plotDownloadInputUI("is_ratio_distribution_plot", "Reference Distribution")
           ),
           shiny::column(width = 7, align = "center",
-            plotDownloadInputUI("is_ratio_plot", "Insulin Secretion (SN2/SN1)")
+            plotDownloadInputUI("is_ratio_plot", "Insulin Secretion Results")
           )
         ),
         shiny::fluidRow(style = "padding-top: 1em;",
@@ -485,11 +493,13 @@ server <- function(input, output, session) {
   ggplot2_colour <- shiny::reactive({
     if (input[["colour_scale"]] == "Grey") {
       ggplot2::scale_colour_grey(
+        labels = (function(x) gsub(".*: ", "", x)),
         start = input[["colour_scale_range"]][1], 
         end = input[["colour_scale_range"]][2]
       )
     } else {
       ggplot2::scale_colour_viridis_d(
+        labels = (function(x) gsub(".*: ", "", x)),
         option = tolower(input[["colour_scale"]]), 
         begin = input[["colour_scale_range"]][1], 
         end = input[["colour_scale_range"]][2]
@@ -500,11 +510,13 @@ server <- function(input, output, session) {
   ggplot2_fill <- shiny::reactive({
     if (input[["colour_scale"]] == "Grey") {
       ggplot2::scale_fill_grey(
+        labels = (function(x) gsub(".*: ", "", x)),
         start = input[["colour_scale_range"]][1], 
         end = input[["colour_scale_range"]][2]
       )
     } else {
       ggplot2::scale_fill_viridis_d(
+        labels = (function(x) gsub(".*: ", "", x)),
         option = tolower(input[["colour_scale"]]), 
         begin = input[["colour_scale_range"]][1], 
         end = input[["colour_scale_range"]][2]
@@ -883,7 +895,7 @@ server <- function(input, output, session) {
           ggplot2_theme() +
           ggplot2::labs(
             x = NULL,
-            y = bquote(atop("Insulin Secretion", group("(", "SN2"/"SN1", ")"))),
+            y = bquote(atop("Insulin Secretion", group("(", "High" / "Low Glucose", ")"))),
             colour = NULL,
             fill = NULL
           ) +
@@ -930,32 +942,25 @@ server <- function(input, output, session) {
         colour = "firebrick2",
         linetype = 2
       ) +
-      ggplot2::geom_hline(
-        data = dplyr::tibble(yintercept = 1),
-        mapping = ggplot2::aes(yintercept = yintercept),
-        colour = "black",
-        linetype = 3
-      ) +
       ggplot2::geom_boxplot(alpha = 0.2, width = 0.5, outlier.shape = NA) +
       ggplot2::geom_violin(alpha = 0.2) +
       ggbeeswarm::geom_quasirandom(
         mapping = ggplot2::aes(
           colour = .data[["Condition"]],
-          fill = .data[["Condition"]],
-          shape = .data[["Condition"]]
+          fill = .data[["Condition"]]
         ),
-        size = input[["point_size"]]
+        size = input[["point_size"]],
+        shape = 1
       ) +
+      ggplot2::scale_x_discrete(labels = (function(x) gsub(".*: ", "", x))) +
       ggplot2::scale_y_continuous(limits = c(0, NA), expand = ggplot2::expand_scale(mult = c(0, 0.05))) +
       ggplot2_colour() +
       ggplot2_fill() +
-      ggplot2::scale_shape() +
       ggplot2::labs(
         x = NULL,
-        y = bquote(atop("Insulin Secretion", group("(", "SN2"/"SN1", ")"))),
+        y = bquote(atop("Insulin Secretion", group("(", "High" / "Low Glucose", ")"))),
         colour = "Condition",
         fill = "Condition",
-        shape = "Condition",
         caption = if (all(xlsx_contents_selected[["is_reference_good"]])) {
           NULL
         } else {
@@ -1117,7 +1122,7 @@ server <- function(input, output, session) {
           ggplot2_theme() +
           ggplot2::labs(
             x = NULL,
-            y = bquote(atop("Insulin Secretion", group("(", "SN2"/"SN1", ")")))
+            y = bquote(atop("Insulin Secretion", group("(", "High" / "Low Glucose", ")")))
           ) +
           ggplot2::annotate(
             "text", x = 0.5, y = 0.5, label = "Not available!",
@@ -1147,13 +1152,22 @@ server <- function(input, output, session) {
                 .f = function(x, data) {
                   mult <- 1.5
                   splitted_data <- dplyr::filter(data, .data[["Type_Target"]] %in% x)
-                  mean_se_fc <- splitted_data %>%
-                    dplyr::group_by(.data[["Type_Target"]]) %>%
-                    dplyr::summarise(
-                      mean_se = mean(.data[["fc_sn2_sn1"]]) +
-                        sqrt(stats::var(.data[["fc_sn2_sn1"]]) / length(.data[["fc_sn2_sn1"]]))
-                    ) %>%
-                    dplyr::ungroup()
+                  if (input[["use_boxplot"]] == "Boxplot") {
+                    mean_se_fc <- splitted_data %>%
+                      dplyr::group_by(.data[["Type_Target"]]) %>%
+                      dplyr::summarise(
+                        mean_se = max(.data[["fc_sn2_sn1"]])
+                      ) %>%
+                      dplyr::ungroup()
+                  } else {
+                    mean_se_fc <- splitted_data %>%
+                      dplyr::group_by(.data[["Type_Target"]]) %>%
+                      dplyr::summarise(
+                        mean_se = mean(.data[["fc_sn2_sn1"]]) +
+                          sqrt(stats::var(.data[["fc_sn2_sn1"]]) / length(.data[["fc_sn2_sn1"]]))
+                      ) %>%
+                      dplyr::ungroup()
+                  }
   
                   default_formula <- fc_sn2_sn1 ~ Type_Target
                   if (length(unique(splitted_data[["Date"]])) > 1) {
@@ -1206,38 +1220,56 @@ server <- function(input, output, session) {
       )
     ) +
       ggplot2_theme() +
-      ggplot2::geom_hline(yintercept = 1, linetype = 2) +
-      ggplot2::geom_errorbar(
-        stat = "summary",
-        fun.data = "mean_se",
-        position = ggplot2::position_dodge(width = 0.9),
-        width = 0.25,
-        show.legend = FALSE,
-        na.rm = TRUE
-      ) +
-      ggplot2::geom_bar(stat = "summary", fun.y = mean, position = ggplot2::position_dodge(width = 0.9)) +
-      ggplot2::geom_label(
-        stat = "summary",
-        fun.data = function(x) {
-          x <- stats::na.omit(x)
-          se <- sqrt(stats::var(x)/length(x))
-          mean <- mean(x)
-          data.frame(y = mean, label = length(x))
-        },
-        position = ggplot2::position_dodge(width = 0.9),
-        fill = "white",
-        colour = "black",
-        show.legend = FALSE,
-        vjust = 1.25
-      ) +
+      {
+        if (input[["use_boxplot"]] == "Boxplot") {
+          list(
+            ggplot2::geom_boxplot(
+              alpha = 0.2,
+              position = ggplot2::position_dodge(width = 0.9),
+              na.rm = TRUE
+            ),
+            ggplot2::geom_point(
+              shape = 1,
+              size = input[["point_size"]],
+              position = ggplot2::position_jitterdodge(dodge.width = 0.9, jitter.width = 0.25),
+              na.rm = TRUE
+            )
+          )
+        } else {
+          list(
+            ggplot2::geom_errorbar(
+              stat = "summary",
+              fun.data = "mean_se",
+              position = ggplot2::position_dodge(width = 0.9),
+              width = 0.25,
+              show.legend = FALSE,
+              na.rm = TRUE
+            ),
+            ggplot2::geom_bar(stat = "summary", fun.y = mean, position = ggplot2::position_dodge(width = 0.9)),
+            ggplot2::geom_label(
+              stat = "summary",
+              fun.data = function(x) {
+                x <- stats::na.omit(x)
+                se <- sqrt(stats::var(x)/length(x))
+                mean <- mean(x)
+                data.frame(y = mean, label = length(x))
+              },
+              position = ggplot2::position_dodge(width = 0.9),
+              fill = "white",
+              colour = "black",
+              show.legend = FALSE,
+              vjust = 1.25
+            ),
+            ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(mult = c(0, 0.05)))
+          )
+        }
+      } +
       ggplot2_colour() +
       ggplot2_fill() +
-      ggplot2::scale_y_continuous(
-        expand = ggplot2::expand_scale(mult = c(0, 0.05))
-      ) +
+      ggplot2::scale_x_discrete(labels = (function(x) gsub(".*: ", "", x))) +
       ggplot2::labs(
         x = NULL,
-        y = bquote(atop("Insulin Secretion", group("(", "SN2"/"SN1", ")"))),
+        y = bquote(atop("Insulin Secretion", group("(", "High" / "Low Glucose", ")"))),
         colour = NULL,
         fill = NULL,
         caption = if (all(xlsx_contents_selected[["is_reference_good"]])) {
