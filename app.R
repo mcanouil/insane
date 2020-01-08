@@ -244,7 +244,7 @@ get_outliers <- function(data, fold_change) {
 # UI-side ==========================================================================================
 ui <- shiny::navbarPage(
   theme = "yeti-bootstrap.min.css",
-  title = "EndoC-βH1",
+  title = shiny::tags$span(shiny::tags$img(src = "endoc_hex.png", height = 18), "EndoC-βH1"),
   windowTitle = "EndoC-βH1",
   collapsible = TRUE,
   id = "main_menu",
