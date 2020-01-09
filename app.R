@@ -80,8 +80,8 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
   out_excel <- out_all_excel %>%
     dplyr::filter(.data[["Project"]] %in% !!project_name) %>% 
     dplyr::mutate(
-      lower_threshold = stats::quantile(.data[["re_OD"]], 0.25) - od_outlier * stats::IQR(.data[["re_OD"]]),
-      upper_threshold = stats::quantile(.data[["re_OD"]], 0.75) + od_outlier * stats::IQR(.data[["re_OD"]]),
+      lower_threshold = stats::quantile(.data[["re_OD"]], 0.25) - !!od_outlier * stats::IQR(.data[["re_OD"]]),
+      upper_threshold = stats::quantile(.data[["re_OD"]], 0.75) + !!od_outlier * stats::IQR(.data[["re_OD"]]),
       is_outlier_OD = .data[["re_OD"]] < .data[["lower_threshold"]] | .data[["re_OD"]] > .data[["upper_threshold"]]
     ) %>%
     dplyr::group_by(.data[["filename"]]) %>%
@@ -109,8 +109,8 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
     ) %>% 
     dplyr::group_by(.data[["term"]]) %>% 
     dplyr::mutate(
-      lower_threshold = stats::quantile(.data[["estimate"]], 0.25) - lm_outlier * stats::IQR(.data[["estimate"]]),
-      upper_threshold = stats::quantile(.data[["estimate"]], 0.75) + lm_outlier * stats::IQR(.data[["estimate"]]),
+      lower_threshold = stats::quantile(.data[["estimate"]], 0.25) - !!lm_outlier * stats::IQR(.data[["estimate"]]),
+      upper_threshold = stats::quantile(.data[["estimate"]], 0.75) + !!lm_outlier * stats::IQR(.data[["estimate"]]),
       is_outlier = .data[["estimate"]] < .data[["lower_threshold"]] | .data[["estimate"]] > .data[["upper_threshold"]]
     ) %>% 
     dplyr::ungroup() %>% 
@@ -251,71 +251,72 @@ ui <- shiny::navbarPage(
   selected = "upload-tab",
   ## Upload tab ------------------------------------------------------------------------------------
   shiny::tabPanel("Upload Experiments & Plot Settings", icon = shiny::icon("file-upload"), value = "upload-tab",
-    shiny::fluidRow(
-      shiny::column(width = 3, align = "center",
-        card(title = "Plot Settings", body = {
-          shiny::tagList(
-            shiny::selectInput("ggplot2_theme", "Theme", 
-              choices = ggplot2_themes[sort(names(ggplot2_themes))], 
-              selected = grep("light", ggplot2_themes, value = TRUE)
-            ),
-            shiny::radioButtons("colour_scale", shiny::tags$span("Colour Palette", shiny::helpText('(No effect on "thresholds areas")')), 
-              choices = c("Viridis", "Plasma", "Magma", "Inferno", "Grey"),
-              inline = TRUE
-            ),
-            shiny::sliderInput("colour_scale_range", shiny::tags$span("Limits of the Colour Palette", shiny::helpText("(Dark to Bright)")), 
-              min = 0, max = 1, 
-              value = c(0, 0.85), 
-              step = 0.05
-            ),
-            shiny::fluidRow(
-              shiny::column(width = 6,
-                shiny::numericInput("font_size", shiny::tags$span("Font Size", shiny::helpText("(pt)")),
-                  value = 16
-                )
-              ),
-              shiny::column(width = 6,
-                shiny::numericInput("point_size", shiny::tags$span("Point Size", shiny::helpText("(mm)")),
-                  value = 2,
-                  min = 0, max = 4, step = 0.5
-                )
+    shiny::column(width = 4,
+      card(title = "Plot Settings", body = {
+        shiny::tagList(
+          shiny::tags$img(src = "endoc_hex.png", height = 120),
+          shiny::selectInput("ggplot2_theme", "Theme", 
+            choices = ggplot2_themes[sort(names(ggplot2_themes))], 
+            selected = grep("light", ggplot2_themes, value = TRUE)
+          ),
+          shiny::radioButtons("colour_scale", shiny::tags$span("Colour Palette", shiny::helpText('(No effect on "thresholds areas")')), 
+            choices = c("Viridis", "Plasma", "Magma", "Inferno", "Grey"),
+            inline = TRUE
+          ),
+          shiny::sliderInput("colour_scale_range", shiny::tags$span("Limits of the Colour Palette", shiny::helpText("(Dark to Bright)")), 
+            min = 0, max = 1, 
+            value = c(0, 0.85), 
+            step = 0.05
+          ),
+          shiny::fluidRow(
+            shiny::column(width = 6,
+              shiny::numericInput("font_size", shiny::tags$span("Font Size", shiny::helpText("(pt)")),
+                value = 16
               )
             ),
-            shiny::fluidRow(
-              shiny::column(width = 6,
-                shiny::numericInput("plot_width", shiny::tags$span("Width", shiny::helpText("(cm)")),
-                  value = 16
-                )
-              ),
-              shiny::column(width = 6,
-                shiny::numericInput("plot_height", shiny::tags$span("Height", shiny::helpText("(cm)")),
-                  value = 12
-                )
+            shiny::column(width = 6,
+              shiny::numericInput("point_size", shiny::tags$span("Point Size", shiny::helpText("(mm)")),
+                value = 2,
+                min = 0, max = 4, step = 0.5
               )
-            ),
-            shiny::numericInput("plot_dpi", shiny::tags$span("Resolution", shiny::helpText("(ppi)")),
-              value = 120
             )
-          )
-        })
-      ),
-      shiny::column(width = 9, align = "center",
-        shiny::fluidRow(
-          shiny::column(width = 6, card(title = "Project", body = shiny::uiOutput("project_ui"))),
-          shiny::column(width = 6,
-            card(title = "Upload Experiments in Excel Files", body = {
-              shiny::fileInput("xlsx_files", 
-                shiny::tags$span("Choose One or Several Excel Files", 
-                  shiny::helpText(shiny::downloadLink("template", "(Use only the following template!)"))
-                ), 
-                multiple = TRUE, width = "90%",
-                accept = c(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+          ),
+          shiny::fluidRow(
+            shiny::column(width = 6,
+              shiny::numericInput("plot_width", shiny::tags$span("Width", shiny::helpText("(cm)")),
+                value = 16
               )
-            })
+            ),
+            shiny::column(width = 6,
+              shiny::numericInput("plot_height", shiny::tags$span("Height", shiny::helpText("(cm)")),
+                value = 12
+              )
+            )
+          ),
+          shiny::numericInput("plot_dpi", shiny::tags$span("Resolution", shiny::helpText("(ppi)")),
+            value = 120
           )
+        )
+      })
+    ),
+    shiny::column(width = 8, align = "center",
+      shiny::fluidRow(
+        shiny::column(width = 6, align = "center",
+          card(title = "Project", body = shiny::uiOutput("project_ui"))
         ),
-        shiny::uiOutput("upload_ui")
-      )
+        shiny::column(width = 6, align = "center",
+          card(title = "Upload Experiments in Excel Files", body = {
+            shiny::fileInput("xlsx_files", 
+              shiny::tags$span("Choose One or Several Excel Files", 
+                shiny::helpText(shiny::downloadLink("template", "(Use only the following template!)"))
+              ), 
+              multiple = TRUE, width = "90%",
+              accept = c(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            )
+          })
+        )
+      ),
+      shiny::fluidRow(shiny::column(width = 12, align = "center", shiny::uiOutput("upload_ui")))
     )
   ),
   ## Blank tab -------------------------------------------------------------------------------------
