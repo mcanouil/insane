@@ -377,7 +377,7 @@ ui <- shiny::navbarPage(
         shiny::tags$div(align = "center", 
           shiny::actionButton("show_issues", "Show Issues in the Selected Experiments"),
           shiny::tags$hr(),
-          shiny::radioButtons("use_boxplot", "Insulin Secretion Results Plot", 
+          shiny::radioButtons("use_boxplot", "Insulin Secretion Plot Type", 
             choiceNames = list(
               shiny::tags$span("Histogram", shiny::helpText("(Bars with mean and sem)")),
               shiny::tags$span("Boxplot", shiny::helpText("(Boxplot with points)"))
@@ -403,7 +403,12 @@ ui <- shiny::navbarPage(
             plotDownloadInputUI("is_ratio_distribution_plot", "Reference Distribution")
           ),
           shiny::column(width = 7, align = "center",
-            plotDownloadInputUI("is_ratio_plot", "Insulin Secretion Results")
+            plotDownloadInputUI("is_ratio_plot", 
+              shiny::span(
+                "Insulin Secretion Results", 
+                shiny::actionLink("about_lm", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;")
+              )
+            )
           )
         ),
         shiny::fluidRow(style = "padding-top: 1em;",
@@ -422,8 +427,22 @@ ui <- shiny::navbarPage(
 
 # Server-side ======================================================================================
 server <- function(input, output, session) {
+  shiny::observeEvent(input[["about_lm"]], {
+    shiny::showModal(shiny::modalDialog(
+      title = "Analysis Method",
+      shiny::tags$p(
+        'Comparisons have been performed using linear regression with',
+        shiny::tags$code("Date"),
+        'and',
+        shiny::tags$code("Operator"),
+        'as covariate if needed.'
+        
+      ),
+      easyClose = TRUE
+    ))
+  })
+  
   shiny::observe({
-    pdf(NULL)
     shiny::req(
       input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]],
       od_box_plot(), od_density_plot(), od_lm_box_plot(), od_lm_line_plot()
@@ -444,7 +463,6 @@ server <- function(input, output, session) {
         )
       }
     )
-    dev.off()
   })
 
   shiny::observe({
@@ -972,7 +990,6 @@ server <- function(input, output, session) {
           "Warning: Reference is not secreting insulin in one or several experiments!"
         }
       ) +
-      # ggplot2::theme(legend.position = "none") +
       ggplot2::theme(plot.caption = ggplot2::element_text(colour = "firebrick2"))
   })
 
@@ -1005,34 +1022,58 @@ server <- function(input, output, session) {
         x = paste0(.data[["Step"]], "\n", .data[["Sample"]]),
         y = .data[["normalised_OD"]],
         colour = .data[["Type_Target"]],
-        fill = .data[["Type_Target"]],
-        group = .data[["Type_Target"]]
+        fill = .data[["Type_Target"]]
       )
     ) +
       ggplot2_theme() +
-      ggplot2::geom_errorbar(
-        stat = "summary",
-        fun.data = "mean_se",
-        position = ggplot2::position_dodge(width = 0.9),
-        width = 0.25,
-        show.legend = FALSE,
-        na.rm = TRUE
-      ) +
-      ggplot2::geom_bar(stat = "summary", fun.y = mean, position = ggplot2::position_dodge(width = 0.9)) +
-      ggplot2::geom_label(
-        stat = "summary",
-        fun.data = function(x) {
-          x <- stats::na.omit(x)
-          data.frame(y = mean(x)/2, label = length(x))
-        },
-        position = ggplot2::position_dodge(width = 0.9),
-        fill = "white",
-        colour = "black",
-        show.legend = FALSE
-      ) +
+      {
+        if (input[["use_boxplot"]] == "Boxplot") {
+          list(
+            ggplot2::geom_boxplot(
+              outlier.shape = NA,
+              alpha = 0.2,
+              position = ggplot2::position_dodge(width = 0.9),
+              na.rm = TRUE
+            ),
+            ggplot2::geom_point(
+              shape = 1,
+              size = input[["point_size"]],
+              position = ggplot2::position_jitterdodge(dodge.width = 0.9, jitter.width = 0.25),
+              na.rm = TRUE
+            )
+          )
+        } else {
+          list(
+            ggplot2::geom_errorbar(
+              stat = "summary",
+              fun.data = "mean_se",
+              position = ggplot2::position_dodge(width = 0.9),
+              width = 0.25,
+              show.legend = FALSE,
+              na.rm = TRUE
+            ),
+            ggplot2::geom_bar(stat = "summary", fun.y = mean, position = ggplot2::position_dodge(width = 0.9)),
+            ggplot2::geom_label(
+              mapping = ggplot2::aes(group = .data[["Type_Target"]]),
+              stat = "summary",
+              fun.data = function(x) {
+                x <- stats::na.omit(x)
+                se <- sqrt(stats::var(x)/length(x))
+                mean <- mean(x)
+                data.frame(y = mean, label = length(x))
+              },
+              position = ggplot2::position_dodge(width = 0.9),
+              fill = "white",
+              colour = "black",
+              show.legend = FALSE,
+              vjust = 1.25
+            ),
+            ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(mult = c(0, 0.05)))
+          )
+        }
+      } +
       ggplot2_colour() +
       ggplot2_fill() +
-      ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(mult = c(0, 0.05))) +
       ggplot2::labs(
         x = NULL,
         y = "Normalised Optical Density\n(OD)",
@@ -1083,25 +1124,58 @@ server <- function(input, output, session) {
       )
     ) +
       ggplot2_theme() +
-      ggplot2::geom_boxplot(
-        outlier.shape = NA,
-        alpha = 0.2,
-        position = ggplot2::position_dodge(width = 0.9),
-        na.rm = TRUE
-      ) +
-      ggplot2::geom_point(
-        shape = 1,
-        size = input[["point_size"]],
-        position = ggplot2::position_jitterdodge(dodge.width = 0.9, jitter.width = 0.25),
-        na.rm = TRUE
-      ) +
+      {
+        if (input[["use_boxplot"]] == "Boxplot") {
+          list(
+            ggplot2::geom_boxplot(
+              outlier.shape = NA,
+              alpha = 0.2,
+              position = ggplot2::position_dodge(width = 0.9),
+              na.rm = TRUE
+            ),
+            ggplot2::geom_point(
+              shape = 1,
+              size = input[["point_size"]],
+              position = ggplot2::position_jitterdodge(dodge.width = 0.9, jitter.width = 0.25),
+              na.rm = TRUE
+            ),
+            ggplot2::scale_y_continuous(labels = scales::percent)
+          )
+        } else {
+          list(
+            ggplot2::geom_errorbar(
+              stat = "summary",
+              fun.data = "mean_se",
+              position = ggplot2::position_dodge(width = 0.9),
+              width = 0.25,
+              show.legend = FALSE,
+              na.rm = TRUE
+            ),
+            ggplot2::geom_bar(stat = "summary", fun.y = mean, position = ggplot2::position_dodge(width = 0.9)),
+            ggplot2::geom_label(
+              mapping = ggplot2::aes(group = .data[["Type_Target"]]),
+              stat = "summary",
+              fun.data = function(x) {
+                x <- stats::na.omit(x)
+                se <- sqrt(stats::var(x)/length(x))
+                mean <- mean(x)
+                data.frame(y = mean, label = length(x))
+              },
+              position = ggplot2::position_dodge(width = 0.9),
+              fill = "white",
+              colour = "black",
+              show.legend = FALSE,
+              vjust = 1.25
+            ),
+            ggplot2::scale_y_continuous(
+              labels = scales::percent,
+              expand = ggplot2::expand_scale(mult = c(0, 0.05))
+            )
+          )
+        }
+      } +
       ggplot2_colour() +
       ggplot2_fill() +
-      ggplot2::scale_y_continuous(
-        labels = scales::percent,
-        limits = c(0, NA),
-        expand = ggplot2::expand_scale(mult = c(0, 0.05))
-      ) +
       ggplot2::labs(
         x = NULL,
         y = "Insulin Secretion\n(% of content)",
