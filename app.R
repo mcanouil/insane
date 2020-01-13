@@ -244,7 +244,7 @@ get_outliers <- function(data, fold_change) {
 # UI-side ==========================================================================================
 ui <- shiny::navbarPage(
   theme = "yeti-bootstrap.min.css",
-  title = shiny::tags$span(shiny::tags$img(src = "endoc_hex.png", height = 18), "EndoC-βH1"),
+  title = shiny::tags$span(shiny::tags$img(src = "endocbetah1.png", height = 18), "EndoC-βH1"),
   windowTitle = "EndoC-βH1",
   collapsible = TRUE,
   id = "main_menu",
@@ -254,7 +254,7 @@ ui <- shiny::navbarPage(
     shiny::column(width = 4,
       card(title = "Plot Settings", body = {
         shiny::tagList(
-          shiny::tags$img(src = "endoc_hex.png", height = 120),
+          shiny::tags$img(src = "endocbetah1.png", height = 120),
           shiny::selectInput("ggplot2_theme", "Theme", 
             choices = ggplot2_themes[sort(names(ggplot2_themes))], 
             selected = grep("light", ggplot2_themes, value = TRUE)
