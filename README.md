@@ -86,7 +86,7 @@ Selected Experiments`.
 A comprehensive list of all issues detected in the selected project is
 available in an `Outliers` tab.
 
-<img src="man/figures/app_010.png" width="100%" />
+<img src="man/figures/app_011.png" width="100%" />
 
 *Note*: The `Outliers` tab is displayed only if there is at least one
 issue in the selected project.

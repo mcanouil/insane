@@ -116,7 +116,7 @@ knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "a
 A comprehensive list of all issues detected in the selected project is available in an `Outliers` tab.
 
 ```{r, echo = FALSE}
-knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_010.png"))
+knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_011.png"))
 ```
 
 *Note*: The `Outliers` tab is displayed only if there is at least one issue in the selected project.
