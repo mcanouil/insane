@@ -4,14 +4,13 @@
 # insane: INsulin Secretion ANalysEr <img src="www/insane.png" align="right" width="120" />
 
 Shiny App to analyse insulin secretion (firstly designed for EndoC-βH1
-cell
-line).
+cell line).
 
 ``` r
 shiny::runGitHub("mcanouil/insane")
 ```
 
-<img src="man/figures/README-app.gif" width="75%" style="display: block; margin: auto;" />
+<img src="man/figures/README-app.gif" width="100%" />
 
 ## Overview
 
@@ -22,18 +21,16 @@ insulin secretion using cell lines such as EndoC-βH1.
 ### Excel Template
 
 An Excel template is provided within the app to help users import their
-experiments in an easy
-way.
+experiments in an easy way.
 
-<img src="man/figures/README-template.gif" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-template.gif" width="100%" />
 
 ### The App
 
 **insane** provides a user-friendly interface which can handle several
-projects
-separately.
+projects separately.
 
-<img src="man/figures/app_003.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/app_003.png" width="100%" />
 
 #### Technical Quality-Control
 
@@ -49,10 +46,9 @@ This technical quality-control step checks:
   - the variability among the duplicated optical density measures of
     each samples;
   - the variability in the blank curves (intercept and slope estimated)
-    among all experiments in a
-project.
+    among all experiments in a project.
 
-<img src="man/figures/app_004.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/app_004.png" width="100%" />
 
 #### Statistical analyses
 
@@ -67,29 +63,30 @@ Conditions are compared using a linear regression with `Date` and
   - Using all experiments in the selected project
     
       - Histogram version
-        <img src="man/figures/app_005.png" width="50%" style="display: block; margin: auto;" />
+        
+        <img src="man/figures/app_005.png" width="50%" />
     
       - Boxplot version
-        <img src="man/figures/app_007.png" width="50%" style="display: block; margin: auto;" />
+        
+        <img src="man/figures/app_007.png" width="50%" />
 
   - Using some of the experiments in the selected project
-    <img src="man/figures/app_008.png" width="50%" style="display: block; margin: auto;" />
+    
+    <img src="man/figures/app_008.png" width="50%" />
 
 If and when some experiments are failing any of the technical
 quality-controls, a summary of the issues regarding the selected
 experiments can be displayed using the button `Show Issues in the
-Selected
-Experiments`.
+Selected Experiments`.
 
-<img src="man/figures/app_006.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/app_006.png" width="100%" />
 
 #### List of Outliers (Issues Detected)
 
 A comprehensive list of all issues detected in the selected project is
-available in an `Outliers`
-tab.
+available in an `Outliers` tab.
 
-<img src="man/figures/app_010.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/app_010.png" width="100%" />
 
 *Note*: The `Outliers` tab is displayed only if there is at least one
 issue in the selected project.
