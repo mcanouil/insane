@@ -3,7 +3,7 @@
 
 # insane: INsulin Secretion ANalysEr <img src="www/insane.png" align="right" width="120" />
 
-Shiny App to analyse insulin secretion (firstly designed for EndoC-βH1
+Shiny App to analyse insulin secretion (intially designed for EndoC-βH1
 cell line).
 
 ``` r
