@@ -8,7 +8,6 @@ output: github_document
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.align = "center",
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
@@ -38,7 +37,7 @@ Shiny App to analyse insulin secretion (firstly designed for EndoC-βH1 cell lin
 ```r
 shiny::runGitHub("mcanouil/insane")
 ```
-```{r, echo = FALSE, out.width = "75%"}
+```{r, echo = FALSE}
 knitr::include_graphics(gsub(".*/man", "man", gif_app))
 ```
 
@@ -88,19 +87,22 @@ Conditions are compared using a linear regression with `Date` and `Operator` as 
 * Using all experiments in the selected project
 
     * Histogram version
+    
         ```{r, echo = FALSE, out.width = "50%"}
         knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_005.png"))
         ```
 
     * Boxplot version
+    
         ```{r, echo = FALSE, out.width = "50%"}
         knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_007.png"))
         ```
 
 * Using some of the experiments in the selected project
-      ```{r, echo = FALSE, out.width = "50%"}
-      knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_008.png"))
-      ```
+
+    ```{r, echo = FALSE, out.width = "50%"}
+    knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_008.png"))
+    ```
 
 If and when some experiments are failing any of the technical quality-controls, a summary of the issues regarding the selected experiments can be displayed using the button `Show Issues in the Selected Experiments`.
 
