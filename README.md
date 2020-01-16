@@ -1,7 +1,11 @@
-# Shiny Application for EndoC-βH1 <img src="www/endocbetah1.png" align="right" width="120" />
 
-Shiny App to analyse insulin secretion in EndoC-βH1.
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```r
-shiny::runGitHub("mcanouil/EndoC_BetaH1")
+# insane: INsulin Secretion ANalysEr <img src="www/insane.png" align="right" width="120" />
+
+Shiny App to analyse insulin secretion (firstly designed for EndoC-βH1
+cell line).
+
+``` r
+shiny::runGitHub("mcanouil/insane")
 ```

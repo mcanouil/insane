@@ -1,7 +1,7 @@
-Package: EndoCBetaH1
-Title: Shiny App to analyse insulin secretion in EndoC-βH1.
+Package: insane
+Title: INsulin Secretion ANalysEr
 Encoding: UTF-8
-Version: 2.0.0
+Version: 0.0.0.9000
 Imports:
     broom (>= 0.5.3),
     dplyr (>= 0.8.3),
