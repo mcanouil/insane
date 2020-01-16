@@ -13,6 +13,22 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 library(gifski)
+gif_template <- gifski(
+  png_files = list.files(dirname(knitr::opts_chunk$get("fig.path")), pattern = "template_", full.names = TRUE), 
+  gif_file = paste0(knitr::opts_chunk$get("fig.path"), "template.gif"), 
+  width = 1920*0.75, height = 1080*0.75,
+  delay = 3, 
+  loop = TRUE, 
+  progress = FALSE
+)
+gif_app <- gifski(
+  png_files = list.files(dirname(knitr::opts_chunk$get("fig.path")), pattern = "app_", full.names = TRUE), 
+  gif_file = paste0(knitr::opts_chunk$get("fig.path"), "app.gif"), 
+  width = 1920*0.75, height = 1080*0.75,
+  delay = 2, 
+  loop = TRUE, 
+  progress = FALSE
+)
 ```
 
 # insane: INsulin Secretion ANalysEr <img src="www/insane.png" align="right" width="120" />
@@ -23,15 +39,7 @@ Shiny App to analyse insulin secretion (firstly designed for EndoC-βH1 cell lin
 shiny::runGitHub("mcanouil/insane")
 ```
 ```{r, echo = FALSE, out.width = "75%"}
-gif_app <- gifski(
-  png_files = list.files(dirname(knitr::opts_chunk$get("fig.path")), pattern = "app_", full.names = TRUE), 
-  gif_file = paste0(knitr::opts_chunk$get("fig.path"), "app.gif"), 
-  width = 1920*0.75, height = 1080*0.75,
-  delay = 2, 
-  loop = TRUE, 
-  progress = FALSE
-)
-knitr::include_graphics(gif_app)
+knitr::include_graphics(gsub(".*/man", "man", gif_app))
 ```
 
 ## Overview
@@ -43,15 +51,7 @@ The Shiny (R package) application __insane__ (*INsulin Secretion ANalysEr*) prov
 An Excel template is provided within the app to help users import their experiments in an easy way.
 
 ```{r, echo = FALSE}
-gif_template <- gifski(
-  png_files = list.files(dirname(knitr::opts_chunk$get("fig.path")), pattern = "template_", full.names = TRUE), 
-  gif_file = paste0(knitr::opts_chunk$get("fig.path"), "template.gif"), 
-  width = 1920*0.75, height = 1080*0.75,
-  delay = 3, 
-  loop = TRUE, 
-  progress = FALSE
-)
-knitr::include_graphics(gif_template)
+knitr::include_graphics(gsub(".*/man", "man", gif_template))
 ```
 
 ### The App
