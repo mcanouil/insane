@@ -11,7 +11,7 @@ line).
 shiny::runGitHub("mcanouil/insane")
 ```
 
-<img src="/disks/PROJECT/_Mickael/insane/man/figures/README-app.gif" width="75%" style="display: block; margin: auto;" />
+<img src="man/figures/README-app.gif" width="75%" style="display: block; margin: auto;" />
 
 ## Overview
 
@@ -25,7 +25,7 @@ An Excel template is provided within the app to help users import their
 experiments in an easy
 way.
 
-<img src="/disks/PROJECT/_Mickael/insane/man/figures/README-template.gif" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-template.gif" width="100%" style="display: block; margin: auto;" />
 
 ### The App
 
