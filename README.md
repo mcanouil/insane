@@ -10,7 +10,7 @@ cell line).
 shiny::runGitHub("mcanouil/insane")
 ```
 
-<img src="man/figures/README-app.gif" width="100%" />
+<img src="man/figures/README-insane.gif" width="100%" />
 
 ## Table of Contents
 
@@ -40,7 +40,7 @@ experiments in an easy way.
 **insane** provides a user-friendly interface which can handle several
 projects separately.
 
-<img src="man/figures/app_003.png" width="100%" />
+<img src="man/figures/README-app_001.png" width="100%" />
 
 #### Technical Quality-Control
 
@@ -58,7 +58,7 @@ This technical quality-control step checks:
   - the variability in the blank curves (intercept and slope estimated)
     among all experiments in a project.
 
-<img src="man/figures/app_004.png" width="100%" />
+<img src="man/figures/README-app_002.png" width="100%" />
 
 #### Statistical analyses
 
@@ -74,29 +74,29 @@ Conditions are compared using a linear regression with `Date` and
     
       - Histogram version
         
-        <img src="man/figures/app_005.png" width="50%" />
+        <img src="man/figures/README-app_003.png" width="50%" />
     
       - Boxplot version
         
-        <img src="man/figures/app_007.png" width="50%" />
+        <img src="man/figures/README-app_004.png" width="50%" />
 
   - Using some of the experiments in the selected project
     
-    <img src="man/figures/app_008.png" width="50%" />
+    <img src="man/figures/README-app_005.png" width="50%" />
 
 If and when some experiments are failing any of the technical
 quality-controls, a summary of the issues regarding the selected
 experiments can be displayed using the button `Show Issues in the
 Selected Experiments`.
 
-<img src="man/figures/app_006.png" width="100%" />
+<img src="man/figures/README-app_006.png" width="100%" />
 
 #### List of Outliers (Issues Detected)
 
 A comprehensive list of all issues detected in the selected project is
 available in an `Outliers` tab.
 
-<img src="man/figures/app_011.png" width="100%" />
+<img src="man/figures/README-app_007.png" width="100%" />
 
 *Note*: The `Outliers` tab is displayed only if there is at least one
 issue in the selected project.

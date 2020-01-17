@@ -13,20 +13,31 @@ knitr::opts_chunk$set(
 )
 library(gifski)
 gif_template <- gifski(
-  png_files = list.files(dirname(knitr::opts_chunk$get("fig.path")), pattern = "template_", full.names = TRUE), 
+  png_files = list.files(
+    path = dirname(knitr::opts_chunk$get("fig.path")), 
+    pattern = "template_", 
+    full.names = TRUE
+  ), 
   gif_file = paste0(knitr::opts_chunk$get("fig.path"), "template.gif"), 
   width = 1920*0.75, height = 1080*0.75,
   delay = 3, 
   loop = TRUE, 
   progress = FALSE
 )
-gif_app <- gifski(
-  png_files = list.files(dirname(knitr::opts_chunk$get("fig.path")), pattern = "app_", full.names = TRUE), 
-  gif_file = paste0(knitr::opts_chunk$get("fig.path"), "app.gif"), 
-  width = 1920*0.75, height = 1080*0.75,
-  delay = 2, 
-  loop = TRUE, 
-  progress = FALSE
+# system("ffmpeg -i insane.mp4 -vf fps=1 insane%04d.png")
+# gif_app <- gifski::gifski(
+#   png_files = list.files("insane_gif", pattern = "*.png", full.names = TRUE), 
+#   gif_file = "insane.gif", 
+#   width = 1920 * 2/3, 
+#   height = 1080 * 2/3,
+#   delay = 1/3,
+#   loop = TRUE, 
+#   progress = FALSE
+# )
+gif_app <- list.files(
+  path = dirname(knitr::opts_chunk$get("fig.path")), 
+  pattern = "README-insane.gif", 
+  full.names = TRUE
 )
 ```
 
@@ -69,7 +80,7 @@ knitr::include_graphics(gsub(".*/man", "man", gif_template))
 __insane__ provides a user-friendly interface which can handle several projects separately.
 
 ```{r, echo = FALSE}
-knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_003.png"))
+knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_001.png"))
 ```
 
 #### Technical Quality-Control
@@ -86,7 +97,7 @@ This technical quality-control step checks:
 * the variability in the blank curves (intercept and slope estimated) among all experiments in a project.
 
 ```{r, echo = FALSE}
-knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_004.png"))
+knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_002.png"))
 ```
 
 #### Statistical analyses 
@@ -100,25 +111,25 @@ Conditions are compared using a linear regression with `Date` and `Operator` as 
     * Histogram version
     
         ```{r, echo = FALSE, out.width = "50%"}
-        knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_005.png"))
+        knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_003.png"))
         ```
 
     * Boxplot version
     
         ```{r, echo = FALSE, out.width = "50%"}
-        knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_007.png"))
+        knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_004.png"))
         ```
 
 * Using some of the experiments in the selected project
 
     ```{r, echo = FALSE, out.width = "50%"}
-    knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_008.png"))
+    knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_005.png"))
     ```
 
 If and when some experiments are failing any of the technical quality-controls, a summary of the issues regarding the selected experiments can be displayed using the button `Show Issues in the Selected Experiments`.
 
 ```{r, echo = FALSE}
-knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_006.png"))
+knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_006.png"))
 ```
 
 
@@ -127,7 +138,7 @@ knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "a
 A comprehensive list of all issues detected in the selected project is available in an `Outliers` tab.
 
 ```{r, echo = FALSE}
-knitr::include_graphics(file.path(dirname(knitr::opts_chunk$get("fig.path")), "app_011.png"))
+knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_007.png"))
 ```
 
 *Note*: The `Outliers` tab is displayed only if there is at least one issue in the selected project.
