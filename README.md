@@ -18,28 +18,27 @@ The Shiny (R package) application **insane** (*INsulin Secretion
 ANalysEr*) provides a web interactive tool to import experiments of
 insulin secretion using cell lines such as EndoC-βH1.
 
-1.  [Excel Template](#excel-template)  
-2.  [The App](#The-App)
-    1.  [Technical Quality-Control](#technical-quality-control)  
-    2.  [Statistical analyses](#statistical-analyses)  
-    3.  [List of Outliers (Issues
-        Detected)](#list-of-outliers-issues-detected)
+1.  [Excel Template](#template)  
+2.  [The App](#app)
+    1.  [Technical Quality-Control](#qc)  
+    2.  [Statistical analyses](#stats)  
+    3.  [List of Outliers (Issues Detected)](#outliers)
 
-### Excel Template
+### Excel Template ([top](#overview))
 
 An Excel template is provided within the app to help users import their
 experiments in an easy way.
 
 <img src="man/figures/README-template.gif" width="100%" />
 
-### The App
+### The App ([top](#overview))
 
 **insane** provides a user-friendly interface which can handle several
 projects separately.
 
 <img src="man/figures/README-app_001.png" width="100%" />
 
-#### Technical Quality-Control
+#### Technical Quality-Control ([top](#overview))
 
 **insane** performs technical quality-control of the optical density
 measured in each steps of the experiments, *e.g.*:
@@ -57,7 +56,7 @@ This technical quality-control step checks:
 
 <img src="man/figures/README-app_002.png" width="100%" />
 
-#### Statistical analyses
+#### Statistical analyses ([top](#overview))
 
 **insane** performs statistical analyses of the experimental conditions
 (if more than one), *e.g.* one silenced gene (*siGENE*) compared to an
@@ -88,7 +87,7 @@ Selected Experiments`.
 
 <img src="man/figures/README-app_006.png" width="100%" />
 
-#### List of Outliers (Issues Detected)
+#### List of Outliers (Issues Detected) ([top](#overview))
 
 A comprehensive list of all issues detected in the selected project is
 available in an `Outliers` tab.
