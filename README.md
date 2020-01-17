@@ -11,7 +11,7 @@ cell line).
 shiny::runGitHub("mcanouil/insane")
 ```
 
-<img src="man/figures/README-insane.gif" width="100%" />
+<img src="man/figures/README-insane_app.gif" width="100%" />
 
 ## Overview
 
