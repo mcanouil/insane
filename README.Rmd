@@ -11,7 +11,9 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+
 library(gifski)
+
 gif_template <- gifski(
   png_files = list.files(
     path = dirname(knitr::opts_chunk$get("fig.path")), 
@@ -24,21 +26,29 @@ gif_template <- gifski(
   loop = TRUE, 
   progress = FALSE
 )
-# system("ffmpeg -i insane.mp4 -vf fps=1 insane%04d.png")
-# gif_app <- gifski::gifski(
-#   png_files = list.files("insane_gif", pattern = "*.png", full.names = TRUE), 
-#   gif_file = "insane.gif", 
-#   width = 1920 * 2/3, 
-#   height = 1080 * 2/3,
-#   delay = 1/3,
-#   loop = TRUE, 
-#   progress = FALSE
-# )
-gif_app <- list.files(
-  path = dirname(knitr::opts_chunk$get("fig.path")), 
-  pattern = "README-insane.gif", 
-  full.names = TRUE
-)
+
+if (file.exists("man/figures/insane_app.mp4")) {
+  system("ffmpeg -i man/figures/insane_app.mp4 -vf fps=1 man/figures/insane_app%04d.png")
+  gif_app <- gifski::gifski(
+    png_files = list.files(
+      path = dirname(knitr::opts_chunk$get("fig.path")), 
+      pattern = "insane_app.*.png", 
+      full.names = TRUE
+    ), 
+    gif_file = paste0(knitr::opts_chunk$get("fig.path"), "insane_app.gif"),
+    width = 1920 * 2/3,
+    height = 1080 * 2/3,
+    delay = 0.50,
+    loop = TRUE,
+    progress = FALSE
+  )
+  unlink(list.files(
+    path = dirname(knitr::opts_chunk$get("fig.path")), 
+    pattern = "insane_app.*.png", 
+    full.names = TRUE
+  ))
+}
+gif_app <- paste0(knitr::opts_chunk$get("fig.path"), "insane_app.gif")
 ```
 
 # insane: INsulin Secretion ANalysEr <img src="man/figures/insane.png" align="right" width="120" />
