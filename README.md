@@ -12,21 +12,18 @@ shiny::runGitHub("mcanouil/insane")
 
 <img src="man/figures/README-insane.gif" width="100%" />
 
-## Table of Contents
-
-1.  [Overview](#overview)
-    1.  [Excel Template](#excel-template)  
-    2.  [The App](#The-App)
-        1.  [Technical Quality-Control](#technical-quality-control)  
-        2.  [Statistical analyses](#statistical-analyses)  
-        3.  [List of Outliers (Issues
-            Detected)](#list-of-outliers-issues-detected)
-
 ## Overview
 
 The Shiny (R package) application **insane** (*INsulin Secretion
 ANalysEr*) provides a web interactive tool to import experiments of
 insulin secretion using cell lines such as EndoC-βH1.
+
+1.  [Excel Template](#excel-template)  
+2.  [The App](#The-App)
+    1.  [Technical Quality-Control](#technical-quality-control)  
+    2.  [Statistical analyses](#statistical-analyses)  
+    3.  [List of Outliers (Issues
+        Detected)](#list-of-outliers-issues-detected)
 
 ### Excel Template
 
