@@ -18,11 +18,12 @@ The Shiny (R package) application **insane** (*INsulin Secretion
 ANalysEr*) provides a web interactive tool to import experiments of
 insulin secretion using cell lines such as EndoC-βH1.
 
-1.  [Excel Template](#template)  
-2.  [The App](#app)
-    1.  [Technical Quality-Control](#qc)  
-    2.  [Statistical analyses](#stats)  
-    3.  [List of Outliers (Issues Detected)](#outliers)
+1.  [Excel Template](#excel-template-top)  
+2.  [The App](#the-app-top)
+    1.  [Technical Quality-Control](#technical-quality-control-top)  
+    2.  [Statistical analyses](#statistical-analyses-top)  
+    3.  [List of Outliers (Issues
+        Detected)](#list-of-outliers-issues-detected-top)
 
 ### Excel Template ([top](#overview))
 
