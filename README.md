@@ -7,6 +7,7 @@ Shiny App to analyse insulin secretion (intially designed for EndoC-βH1
 cell line).
 
 ``` r
+# install.packages("shiny")
 shiny::runGitHub("mcanouil/insane")
 ```
 
