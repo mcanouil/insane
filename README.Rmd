@@ -19,7 +19,7 @@ gif_template <- gifski(
     full.names = TRUE
   ), 
   gif_file = paste0(knitr::opts_chunk$get("fig.path"), "template.gif"), 
-  width = 1920*0.75, height = 1080*0.75,
+  width = 1920 * 2/3, height = 1080 * 2/3,
   delay = 3, 
   loop = TRUE, 
   progress = FALSE
