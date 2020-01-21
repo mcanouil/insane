@@ -51,7 +51,7 @@ if (file.exists("man/figures/insane_app.mp4")) {
 gif_app <- paste0(knitr::opts_chunk$get("fig.path"), "insane_app.gif")
 ```
 
-# insane: INsulin Secretion ANalysEr <img src="man/figures/insane.png" align="right" width="120" />
+# INsulin Secretion ANalysEr <img src="man/figures/insane.png" align="right" width="120" />
 
 Shiny App to analyse insulin secretion (intially designed for EndoC-βH1 cell line).
 
