@@ -60,6 +60,11 @@ plotDownloadInput <- function(id, plot_object, width, height, dpi) {
   })
 }
 
+cap_word <- function(x) {
+  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+  x
+}
+
 get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_outlier = 1.5) {
   out_all_excel <- dplyr::tibble(file = files, filename = basename(file)) %>%
     dplyr::mutate(sheet_name = purrr::map(.data[["file"]], readxl::excel_sheets)) %>%
@@ -199,7 +204,7 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
     dplyr::ungroup() %>% 
     dplyr::mutate(
       Sample = factor(Sample, levels = unique(.data[["Sample"]])),
-      Type = factor(Type, levels = c("Reference", "Control", "Target")),
+      Type = factor(cap_word(Type), levels = c("Reference", "Control", "Target")),
     ) %>% 
     dplyr::arrange(.data[["Type"]], .data[["Target"]]) %>% 
     dplyr::mutate(
