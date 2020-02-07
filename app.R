@@ -85,8 +85,10 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
   out_excel <- out_all_excel %>%
     dplyr::filter(.data[["Project"]] %in% !!project_name) %>% 
     dplyr::mutate(
-      lower_threshold = stats::quantile(.data[["re_OD"]], 0.25) - !!od_outlier * stats::IQR(.data[["re_OD"]]),
-      upper_threshold = stats::quantile(.data[["re_OD"]], 0.75) + !!od_outlier * stats::IQR(.data[["re_OD"]]),
+      lower_threshold = stats::quantile(.data[["re_OD"]], 0.25, na.rm = TRUE) - 
+        !!od_outlier * stats::IQR(.data[["re_OD"]], na.rm = TRUE),
+      upper_threshold = stats::quantile(.data[["re_OD"]], 0.75, na.rm = TRUE) + 
+        !!od_outlier * stats::IQR(.data[["re_OD"]], na.rm = TRUE),
       is_outlier_OD = .data[["re_OD"]] < .data[["lower_threshold"]] | .data[["re_OD"]] > .data[["upper_threshold"]]
     ) %>%
     dplyr::group_by(.data[["filename"]]) %>%
