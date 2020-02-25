@@ -1,6 +1,6 @@
 template:
   params:
-    bootswatch: solar
+    bootswatch: sandstone
 
 development:
   mode: auto
