@@ -7,8 +7,8 @@
 \title{insane: INsulin Secretion ANalysEr}
 \description{
 A user-friendly interface, using Shiny, to analyse insulin secretion in cells.
-    The Shiny App was initially designed for EndoC-βH1 cell line following method described 
-    in (Ndiaye et al. (2017) <doi:10.1016/j.molmet.2017.03.011>).
+    The Shiny App was initially designed for EndoC-betaH1 cell line following method described 
+    in Ndiaye et al., 2017 (<doi:10.1016/j.molmet.2017.03.011>).
 }
 \seealso{
 Useful links:
