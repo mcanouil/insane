@@ -3,12 +3,43 @@
 
 # INsulin Secretion ANalysEr <img src="man/figures/insane.png" align="right" width="120" />
 
-Shiny App to analyse insulin secretion (intially designed for EndoC-βH1
+<!-- badges: start -->
+
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![GitHub
+tag](https://img.shields.io/github/tag/mcanouil/insane.svg?label=latest%20tag&include_prereleases)](https://github.com/mcanouil/insane)
+[![Travis-CI Build
+Status](https://travis-ci.org/mcanouil/insane.svg?branch=master)](https://travis-ci.org/mcanouil/insane)
+[![AppVeyor Build
+Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/insane?branch=master&svg=true)](https://ci.appveyor.com/project/mcanouil/insane)
+[![R build
+status](https://github.com/mcanouil/insane/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/insane)
+[![Coverage Status
+(codecov)](https://codecov.io/gh/mcanouil/insane/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/insane)
+[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version-ago/insane)](https://cran.r-project.org/package=insane)
+[![cran
+checks\_worst](https://cranchecks.info/badges/worst/insane)](https://cran.r-project.org/web/checks/check_results_insane.html)
+[![CRAN\_Download\_total](https://cranlogs.r-pkg.org/badges/insane)](https://cran.r-project.org/package=insane)
+<!-- badges: end -->
+
+Shiny App to analyse insulin secretion (initially designed for EndoC-βH1
 cell line).
 
+## Installation
+
 ``` r
-# install.packages("shiny")
-shiny::runGitHub("mcanouil/insane")
+# Install insane from CRAN:
+install.packages("insane")
+
+# Or the the development version from GitHub:
+# install.packages("remotes")
+remotes::install_github("mcanouil/insane")
+```
+
+``` r
+library("insane")
+go_insane()
 ```
 
 <img src="man/figures/README-insane_app.gif" width="100%" />
