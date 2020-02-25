@@ -69,7 +69,8 @@ checks\_worst](https://cranchecks.info/badges/worst/insane)](https://cran.r-proj
 [![CRAN\_Download\_total](https://cranlogs.r-pkg.org/badges/insane)](https://cran.r-project.org/package=insane)
 <!-- badges: end -->
 
-Shiny App to analyse insulin secretion (initially designed for EndoC-βH1 cell line).
+A user-friendly interface, using Shiny, to analyse insulin secretion in cells.  
+The Shiny App was initially designed for EndoC-βH1 cell line following method described in Ndiaye et al., 2017 (<doi:10.1016/j.molmet.2017.03.011>).
 
 ## Installation
 
