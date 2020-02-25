@@ -44,10 +44,6 @@ remotes::install_github("mcanouil/insane")
 library("insane")
 go_insane()
 ```
-```{r, echo = FALSE}
-gif_app <- paste0(knitr::opts_chunk$get("fig.path"), "insane_app.gif")
-knitr::include_graphics(gsub(".*/man", "man", gif_app))
-```
 
 
 ## Overview
@@ -63,11 +59,6 @@ The Shiny (R package) application __insane__ (*INsulin Secretion ANalysEr*) prov
 ### Excel Template ([top](#overview))
 
 An Excel template is provided within the app to help users import their experiments in an easy way.
-
-```{r, echo = FALSE}
-gif_template <- paste0(knitr::opts_chunk$get("fig.path"), "template.gif")
-knitr::include_graphics(gsub(".*/man", "man", gif_template))
-```
 
 ### The App ([top](#overview))
 
