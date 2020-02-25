@@ -1,5 +1,6 @@
-#' Run the `"insane"` Shiny Application
+#' Run the Shiny Application
 #'
+#' @description 
 #' Runs a Shiny application. This function normally does not return; 
 #' interrupt R to stop the application (usually by pressing Ctrl+C or Esc). 
 #'
