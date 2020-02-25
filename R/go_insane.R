@@ -26,6 +26,7 @@ go_insane <- function(
   if (!interactive()) {
     stop('[insane] Must be run in an interactive R session!')
   }
+  # nocov start
   shiny::runApp(
     appDir = system.file("app", package = "insane"), 
     port = port,
@@ -36,4 +37,5 @@ go_insane <- function(
     display.mode = display.mode,
     test.mode = test.mode
   )
+  # nocov end
 }
