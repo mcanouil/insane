@@ -13,8 +13,6 @@ tag](https://img.shields.io/github/tag/mcanouil/insane.svg?label=latest%20tag&in
 Status](https://travis-ci.org/mcanouil/insane.svg?branch=master)](https://travis-ci.org/mcanouil/insane)
 [![AppVeyor Build
 Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/insane?branch=master&svg=true)](https://ci.appveyor.com/project/mcanouil/insane)
-[![R build
-status](https://github.com/mcanouil/insane/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/insane)
 [![Coverage Status
 (codecov)](https://codecov.io/gh/mcanouil/insane/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/insane)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version-ago/insane)](https://cran.r-project.org/package=insane)
