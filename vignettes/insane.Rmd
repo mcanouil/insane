@@ -1,0 +1,138 @@
+---
+title: "insane: INsulin Secretion ANalysEr"
+author: "Mickaël Canouil, Ph.D."
+email: "mickael.canouil@cnrs.fr"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output: 
+  rmarkdown::html_vignette:
+    number_sections: true
+    toc: true
+    toc_depth: 2
+    fig_width: 6.3
+    fig_height: 4.7
+vignette: >
+  %\VignetteIndexEntry{insane: INsulin Secretion ANalysEr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-",
+  out.width = "100%"
+)
+```
+
+```{r logo, echo = FALSE, out.width = "150px"}
+knitr::include_graphics(path = "insane.png")
+```
+
+## Installation
+
+```{r, eval = FALSE}
+# Install insane from CRAN:
+install.packages("insane")
+
+# Or the the development version from GitHub:
+# install.packages("remotes")
+remotes::install_github("mcanouil/insane")
+```
+
+```{r, eval = FALSE}
+library("insane")
+go_insane()
+```
+```{r, echo = FALSE}
+gif_app <- paste0(knitr::opts_chunk$get("fig.path"), "insane_app.gif")
+knitr::include_graphics(gsub(".*/man", "man", gif_app))
+```
+
+
+## Overview
+
+The Shiny (R package) application __insane__ (*INsulin Secretion ANalysEr*) provides a web interactive tool to import experiments of insulin secretion using cell lines such as EndoC-βH1.
+
+1. [Excel Template](#excel-template-top)  
+2. [The App](#the-app-top)  
+    1. [Technical Quality-Control](#technical-quality-control-top)  
+    2. [Statistical analyses](#statistical-analyses-top)  
+    3. [List of Outliers (Issues Detected)](#list-of-outliers-issues-detected-top)
+
+### Excel Template ([top](#overview))
+
+An Excel template is provided within the app to help users import their experiments in an easy way.
+
+```{r, echo = FALSE}
+gif_template <- paste0(knitr::opts_chunk$get("fig.path"), "template.gif")
+knitr::include_graphics(gsub(".*/man", "man", gif_template))
+```
+
+### The App ([top](#overview))
+
+__insane__ provides a user-friendly interface which can handle several projects separately.
+
+```{r, echo = FALSE}
+knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_001.png"))
+```
+
+#### Technical Quality-Control ([top](#overview))
+
+__insane__ performs technical quality-control of the optical density measured in each steps of the experiments, *e.g.*:
+
+* blank (*BLANK*), 
+* lysat (*LYSAT*), 
+* supernatant (*SN1* and *SN2*).  
+
+This technical quality-control step checks:
+
+* the variability among the duplicated optical density measures of each samples;
+* the variability in the blank curves (intercept and slope estimated) among all experiments in a project.
+
+```{r, echo = FALSE}
+knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_002.png"))
+```
+
+#### Statistical analyses ([top](#overview))
+
+__insane__ performs statistical analyses of the experimental conditions (if more than one), *e.g.* one silenced gene (*siGENE*) compared to an insulin secretion *reference* (*siNTP*) in two stimulation conditions (*Glc* and *Glc + IBMX*).
+
+Conditions are compared using a linear regression with `Date` and `Operator` as covariates (if needed) to control for heterogeneity.
+
+* Using all experiments in the selected project
+
+    * Histogram version
+    
+        ```{r, echo = FALSE, out.width = "50%"}
+        knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_003.png"))
+        ```
+
+    * Boxplot version
+    
+        ```{r, echo = FALSE, out.width = "50%"}
+        knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_004.png"))
+        ```
+
+* Using some of the experiments in the selected project
+
+    ```{r, echo = FALSE, out.width = "50%"}
+    knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_005.png"))
+    ```
+
+If and when some experiments are failing any of the technical quality-controls, a summary of the issues regarding the selected experiments can be displayed using the button `Show Issues in the Selected Experiments`.
+
+```{r, echo = FALSE}
+knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_006.png"))
+```
+
+
+#### List of Outliers (Issues Detected) ([top](#overview))
+
+A comprehensive list of all issues detected in the selected project is available in an `Outliers` tab.
+
+```{r, echo = FALSE}
+knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_007.png"))
+```
+
+*Note*: The `Outliers` tab is displayed only if there is at least one issue in the selected project.
