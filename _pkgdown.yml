@@ -1,6 +1,6 @@
 template:
   params:
-    bootswatch: united
+    bootswatch: solar
 
 development:
   mode: auto
