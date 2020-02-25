@@ -2,7 +2,7 @@
 % Please edit documentation in R/go_insane.R
 \name{go_insane}
 \alias{go_insane}
-\title{Run the \code{"insane"} Shiny Application}
+\title{Run the Shiny Application}
 \usage{
 go_insane(
   port = getOption("shiny.port"),

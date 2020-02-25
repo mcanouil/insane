@@ -2,7 +2,7 @@
 % Please edit documentation in R/deploy.R
 \name{deploy}
 \alias{deploy}
-\title{Deploy (copy) the shiny application to the specified directory}
+\title{Deploy the Shiny App}
 \usage{
 deploy(directory = "/srv/shiny-server", app_name = "insane")
 }
