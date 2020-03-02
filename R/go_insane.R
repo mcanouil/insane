@@ -34,7 +34,7 @@ go_insane <- function(
   app_name <- paste0("app_", floor(as.numeric(Sys.time())))
   on.exit(unlink(file.path(tempdir(), app_name), recursive = TRUE))
   deploy(directory = tempdir(), app_name = app_name, with_examples = with_examples)
-  
+
   shiny::runApp(
     appDir = file.path(tempdir(), app_name), 
     port = port,
