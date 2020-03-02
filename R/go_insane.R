@@ -29,10 +29,12 @@ go_insane <- function(
   if (!interactive()) {
     stop('[insane] Must be run in an interactive R session!')
   }
+
+  # nocov start
   app_name <- paste0("app_", floor(as.numeric(Sys.time())))
   on.exit(unlink(file.path(tempdir(), app_name), recursive = TRUE))
   deploy(directory = tempdir(), app_name = app_name, with_examples = with_examples)
-  # nocov start
+  
   shiny::runApp(
     appDir = file.path(tempdir(), app_name), 
     port = port,
