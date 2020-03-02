@@ -5,6 +5,7 @@
 \title{Run the Shiny Application}
 \usage{
 go_insane(
+  with_examples = FALSE,
   port = getOption("shiny.port"),
   launch.browser = getOption("shiny.launch.browser", interactive()),
   host = getOption("shiny.host", "127.0.0.1"),
@@ -15,6 +16,8 @@ go_insane(
 )
 }
 \arguments{
+\item{with_examples}{[\link{logical}] A boolean indicating if examples should be copied in the App.}
+
 \item{port}{The TCP port that the application should listen on. If the
 \code{port} is not specified, and the \code{shiny.port} option is set (with
 \code{options(shiny.port = XX)}), then that port will be used. Otherwise,

@@ -4,12 +4,18 @@
 \alias{deploy}
 \title{Deploy the Shiny App}
 \usage{
-deploy(directory = "/srv/shiny-server", app_name = "insane")
+deploy(
+  directory = "/srv/shiny-server",
+  app_name = "insane",
+  with_examples = FALSE
+)
 }
 \arguments{
 \item{directory}{[\link{character}] A character vector of one path to the new location.}
 
 \item{app_name}{[\link{character}] A character vector defining the shiny application name in the new location.}
+
+\item{with_examples}{[\link{logical}] A boolean indicating if examples should be copied in the App.}
 }
 \value{
 [\link{logical}] A logical indicating whether the deployment is successfull (\code{TRUE}) or not (\code{FALSE}).
