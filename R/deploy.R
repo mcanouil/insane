@@ -24,14 +24,15 @@ deploy <- function(directory = "/srv/shiny-server", app_name = "insane", with_ex
     to = file.path(directory, app_name),
     overwrite = TRUE, recursive = TRUE
   ))
+  Sys.chmod(file.path(directory, app_name, "www"))
   
   if (with_examples) {
     dir.create(file.path(directory, app_name, "www", "xlsx"), showWarnings = FALSE)
-    all(file.copy(
+    out <- all(c(out, file.copy(
       from = list.files(system.file("extdata", package = "insane"), full.names = TRUE, recursive = TRUE),
       to = file.path(directory, app_name, "www", "xlsx"),
       overwrite = TRUE, recursive = TRUE
-    ))
+    )))
   }
   
   out
