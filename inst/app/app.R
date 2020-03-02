@@ -386,10 +386,10 @@ ui <- shiny::navbarPage(
           shiny::tags$hr(),
           shiny::radioButtons("use_boxplot", "Insulin Secretion Plot Type", 
             choiceNames = list(
-              shiny::tags$span("Histogram", shiny::helpText("(Bars with mean and sem)")),
-              shiny::tags$span("Boxplot", shiny::helpText("(Boxplot with points)"))
+              shiny::tags$span("Boxplot", shiny::helpText("(Boxplot with points)")),
+              shiny::tags$span("Histogram", shiny::helpText("(Bars with mean and sem)"))
             ), 
-            choiceValues = c("Histogram", "Boxplot"), 
+            choiceValues = c("Boxplot", "Histogram"), 
             inline = TRUE
           ),
           shiny::numericInput("fold_change",
