@@ -395,7 +395,7 @@ ui <- shiny::navbarPage(
           shiny::numericInput("fold_change",
             shiny::tags$span('Threshold to Define "Secretion"',
               shiny::helpText(
-                "(Threshold above which cells are allegedly secreting insulin)"
+                "(High/low glucose threshold above which cells are allegedly secreting insulin)"
               )
             ),
             value = 1, step = 0.1
@@ -407,7 +407,12 @@ ui <- shiny::navbarPage(
       shiny::mainPanel(width = 9,
         shiny::fluidRow(
           shiny::column(width = 5, align = "center",
-            plotDownloadInputUI("is_ratio_distribution_plot", "Reference Distribution")
+            plotDownloadInputUI("is_ratio_distribution_plot", 
+              shiny::span(
+                "Reference Distribution", 
+                shiny::actionLink("about_fc", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;")
+              )
+            )
           ),
           shiny::column(width = 7, align = "center",
             plotDownloadInputUI("is_ratio_plot", 
@@ -434,6 +439,22 @@ ui <- shiny::navbarPage(
 
 # Server-side ======================================================================================
 server <- function(input, output, session) {
+  shiny::observeEvent(input[["about_fc"]], {
+    shiny::showModal(shiny::modalDialog(
+      title = 'Threshold to Define "Secretion"',
+      shiny::tags$p(
+        'High/low glucose threshold above which cells are allegedly secreting insulin.',
+        shiny::tags$br(),
+        "For each experiments", 
+        "(", shiny::tags$i("i.e.", .noWS = "outside"), ", an Excel spreadsheet)", 
+        "cells are considered not secreting insulin in", shiny::tags$code("Reference"), 
+        "(", shiny::tags$code('Type=="Reference"', .noWS = "outside"), ")",
+        "when the mean of the optical density measures for a", shiny::tags$code("Condition"),
+        "in a", shiny::tags$code("Step"), "is strictly below the defined threshold."
+      ),
+      easyClose = TRUE
+    ))
+  })
   shiny::observeEvent(input[["about_lm"]], {
     shiny::showModal(shiny::modalDialog(
       title = "Analysis Method",
