@@ -1,4 +1,4 @@
-# insane (development version)
+# insane 0.1.0
 
 ## New features
 
