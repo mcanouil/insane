@@ -2,7 +2,7 @@
 
 ### Local server (`devtools::check()`)
 
-* Linux Debian 4.9.110-3+deb9u2, R-3.6.2: 
+* Linux Debian 4.9.110-3+deb9u2, R-3.6.3: 
 
 ### win-builder (`devtools::check_win_devel()`)
 
@@ -22,7 +22,7 @@
 
 ### Appveyor-ci
 
-* Windows Server 2012 R2 x64 (build 9600), R-3.6.2: 
+* Windows Server 2012 R2 x64 (build 9600), R-3.6.3: 
 
 ### travis-ci
 
