@@ -37,7 +37,7 @@ Suggests:
     roxygen2 (>= 7.0.2),
     knitr (>= 1.27),
     testthat (>= 2.3.1),
-    rmarkdown
+    rmarkdown (>= 2.1)
 VignetteBuilder: 
     knitr
 Encoding: UTF-8
