@@ -112,4 +112,6 @@ The plate is then washed six times with wash buffer 1X solution.
 Then, 200&nbsp;µl substrate is added in the plate for a 15-minute incubation.  
 Then, 50&nbsp;µl stop solution is added and the absorbance at 450&nbsp;nm is measured, using technical duplicates of experimental triplicates, leading to six measurements per experimental conditions (that are subsequently repeated).
 
+*Note*: absorbance values need to be written within the Excel template provided by the **insane** package.
+
 #### References
