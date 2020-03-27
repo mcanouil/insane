@@ -1,0 +1,117 @@
+---
+title: "insane: INsulin Secretion ANalysEr"
+subtitle: "Experimental Protocol"
+author: "Amélie Bonnefond, Ph.D."
+email: "amelie.bonnefond@cnrs.fr"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+references:
+- id: ndiaye_expression_2017
+  title: Expression and functional assessment of candidate type 2 
+    diabetes susceptibility genes identify four new genes contributing to human insulin secretion
+  author:
+      - family: Ndiaye
+        given: Fatou K. 
+      - family: Ortalli
+        given: Ana 
+      - family: Canouil
+        given: Mickaël
+      - family: Huyvaert
+        given: Marlène
+      - family: Salazar-Cardozo
+        given: Clara
+      - family: Lecoeur
+        given: Cécile
+      - family: Verbanck
+        given: Marie
+      - family: Pawlowski
+        given: Valérie
+      - family: Boutry
+        given: Raphaël
+      - family: Durand
+        given: Emmanuelle
+      - family: Rabearivelo
+        given: Iandry
+      - family: Sand
+        given: Olivier
+      - family: Marselli
+        given: Lorella
+      - family: Kerr-Conte
+        given: Julie
+      - family: Chandra
+        given: Vikash
+      - family: Scharfmann
+        given: Raphaël
+      - family: Poulain-Godefroy
+        given: Odile
+      - family: Marchetti
+        given: Piero
+      - family: Pattou
+        given: François
+      - family: Abderrahmani
+        given: Amar
+      - family: Froguel
+        given: Philippe
+      - family: Bonnefond
+        given: Amélie
+  container-title: Molecular Metabolism
+  volume: 6
+  issn: 2212-8778
+  URL: 'http://dx.doi.org/10.1016/j.molmet.2017.03.011'
+  DOI: 10.1016/j.molmet.2017.03.011
+  issue: 6
+  publisher: Molecular Metabolism
+  page: 459-470
+  type: article-journal
+  issued:
+    year: 2017
+    month: 6
+link-citations: true
+nocite: | 
+  @ndiaye_expression_2017
+output: 
+  rmarkdown::html_vignette:
+    number_sections: false
+    toc: false
+    toc_depth: 3
+    fig_width: 6.3
+    fig_height: 4.7
+vignette: >
+  %\VignetteIndexEntry{insane: Experimental Protocol}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}t
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Methods
+
+## Culture of EndoC-βH1 cells
+
+EndoC-βH1 cells are cultured in Optiβ medium (Univercell). 
+Cells are seeded at a density of 2.5&nbsp;×&nbsp;10<sup>6</sup> in T25 flasks coated with β-coat (Univercell) according to manufacturer’s instructions, and cultured at 37&nbsp;°C and 5&nbsp;% CO2. 
+
+## Transfection of siRNA into EndoC-βH1 cells
+
+In case of transfection, siRNAs are transfected into EndoC-βH1 cells using Lipofectamine 2000 (Invitrogen).  
+Freshly trypsinized EndoC-βH1 (0.5&nbsp;×&nbsp;10<sup>6</sup> cells) are incubated in suspension with Lipofectamine-siRNA complex in Opti-MEM (Invitrogen) containing 50&nbsp;μM 2-mercaptoethanol, 10&nbsp;mM nicotinamide (Calbiochem, Merck Millipore), 5.5&nbsp;mg/ml human transferrin (Sigma-Aldrich), 6.7&nbsp;ng/ml sodium selenite (Sigma-Aldrich), 100&nbsp;U/ml penicillin and 100&nbsp;mg/ml streptomycin (Life Technologies) for 10&nbsp;minutes and then are plated onto culture wells coated with β-oat (Univercell).  
+Six hours later, the medium is replaced.  
+We previously used ON-TARGETplus siRNA SMARTpool for each gene of interest (20-30&nbsp;nM) and ON-TARGETplus nontargeting pool for controls (siNTP; Dharmacon, Thermo Fisher Scientific, Waltham, MA, USA) [@ndiaye_expression_2017].  
+Cells are analyzed 72 hours post transfection.
+
+## Assessment of insulin secretion from EndoC-βH1 cells
+
+EndoC-βH1 cells seeded onto β-coat-coated 96-well plates at 5&nbsp;×&nbsp;10<sup>4</sup> cells/well are incubated overnight in no glucose Dulbecco’s Modified Eagle’s Medium (Sigma Aldrich) supplemented with 2&nbsp;% BSA Fraction V, 50&nbsp;μM 2-mercaptoethanol, 10&nbsp;mM nicotinamide (Calbiochem, Merck Millipore), 5.5&nbsp;mg/ml human transferrin (Sigma-Aldrich), 6.7&nbsp;ng/ml sodium selenite (Sigma-Aldrich), 100&nbsp;U/ml penicillin and 100&nbsp;mg/ml streptomycin (Life Technologies) and that contained 2.8&nbsp;mM glucose.  
+The day after, they are incubated in HEPES-buffered Krebs-Ringer Buffer (KRB; 116&nbsp;mmol/l NaCl, 5.06&nbsp;mmol/l KCl, 1.007&nbsp;mmol/l CaCl2, 1.01&nbsp;mmol/l MgCl2, 23.96&nbsp;mmol/l NaHCO3, 10&nbsp;mmol/l HEPES, pH&nbsp;7.4, and 0.1&nbsp;% BSA solution) that contained 0.5&nbsp;mM glucose ±&nbsp;0.5 mM IBMX (Sigma Aldrich) for 60&nbsp;minutes at 37&nbsp;°C.  
+This supernatant is subsequently collected (supernatant 1 [SN1]) and replaced with 16.7&nbsp;mM glucose KRB ±&nbsp;0.5 mM IBMX for a 60-minute incubation at 37&nbsp;°C and then collected (supernatant 2 [SN2]).  
+For insulin content measurement, cells are lysed with TETG buffer (20&nbsp;mM Tris-HCl pH&nbsp;8.0, 137&nbsp;mM NaCl, 1&nbsp;% Triton X-100, 10&nbsp;% Glycerol, 2&nbsp;mM EGTA with protease inhibitors; Roche).  
+Lysate, SN1 and SN2 are centrifuged for 5&nbsp;minutes at 700&nbsp;g.  
+Samples are kept frozen at -20&nbsp;°C before use.  
+Insulin concentration in the supernatants and intracellular content of the EndoC-βH1 cells are measured by ELISA according to manufacturer’s instructions using the Human Insulin Kit (Mercodia, Uppsala, Sweden).  
+Briefly, 25&nbsp;µl of either blank, standard (from 0.2 to 6&nbsp;µg/ml), or diluted samples (1:400 for lysates and 1:16 for supernatants) and 100&nbsp;µl 1X conjugate enzyme are put in the 96-well plate coated with insulin antibody for 1&nbsp;hour under agitation at room temperature.  
+The plate is then washed six times with wash buffer 1X solution.  
+Then, 200&nbsp;µl substrate is added in the plate for a 15-minute incubation.  
+Then, 50&nbsp;µl stop solution is added and the absorbance at 450&nbsp;nm is measured, using technical duplicates of experimental triplicates, leading to six measurements per experimental conditions (that are subsequently repeated).
+
+# References
