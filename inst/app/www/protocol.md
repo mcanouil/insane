@@ -62,6 +62,9 @@ measured, using technical duplicates of experimental triplicates,
 leading to six measurements per experimental conditions (that are
 subsequently repeated).
 
+*Note*: absorbance values need to be written within the Excel template
+provided by the **insane** package.
+
 #### References
 
 Ndiaye, Fatou K., Ana Ortalli, Mickaël Canouil, Marlène Huyvaert, Clara

@@ -319,12 +319,14 @@ ui <- shiny::tagList(
             card(title = "Upload Experiments in Excel Files", body = {
               shiny::fileInput("xlsx_files", 
                 shiny::tags$span("Choose One or Several Excel Files", 
-                  shiny::tags$ul(
-                    shiny::tags$li(
-                      shiny::helpText(shiny::downloadLink("protocol", "Experimental protocol"))
+                  shiny::tags$p(
+                    shiny::helpText(
+                      style = "font-size: 0.75em;", 
+                      shiny::downloadLink("protocol", "Download the experimental protocol (.docx)")
                     ),
-                    shiny::tags$li(
-                      shiny::helpText(shiny::downloadLink("template", "Results template"))
+                    shiny::helpText(
+                      style = "font-size: 0.75em;", 
+                      shiny::downloadLink("template", "Download the results template (.xlsx)")
                     )
                   )
                 ), 
@@ -448,9 +450,7 @@ ui <- shiny::tagList(
     ),
     ## Protocol ----------------------------------------------------------------------------------
     shiny::tabPanel("About", icon = shiny::icon("info"), value = "about-tab",
-      # card(title = shiny::tags$h4("Experimental Protocol"), 
-        shiny::tags$p(shiny::includeMarkdown("www/protocol.md"))
-      # )
+      shiny::tags$p(shiny::includeMarkdown("www/protocol.md"))
     )
   )
 )
