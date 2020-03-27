@@ -249,191 +249,209 @@ get_outliers <- function(data, fold_change) {
 }
 
 # UI-side ==========================================================================================
-ui <- shiny::navbarPage(
-  theme = "yeti-bootstrap.min.css",
-  title = shiny::tags$span(shiny::tags$img(src = "insane.png", height = 18), "INSANE (INsulin Secretion ANalysEr)"),
-  windowTitle = "INSANE (INsulin Secretion ANalysEr)",
-  collapsible = TRUE,
-  id = "main_menu",
-  selected = "upload-tab",
-  ## Upload tab ------------------------------------------------------------------------------------
-  shiny::tabPanel("Upload Experiments & Plot Settings", icon = shiny::icon("file-upload"), value = "upload-tab",
-    shiny::column(width = 4,
-      card(title = "Plot Settings", body = {
-        shiny::tagList(
-          shiny::tags$img(src = "insane.png", height = 120),
-          shiny::selectInput("ggplot2_theme", "Theme", 
-            choices = ggplot2_themes[sort(names(ggplot2_themes))], 
-            selected = grep("light", ggplot2_themes, value = TRUE)
-          ),
-          shiny::radioButtons("colour_scale", shiny::tags$span("Colour Palette", shiny::helpText('(No effect on "thresholds areas")')), 
-            choices = c("Viridis", "Plasma", "Magma", "Inferno", "Grey"),
-            inline = TRUE
-          ),
-          shiny::sliderInput("colour_scale_range", shiny::tags$span("Limits of the Colour Palette", shiny::helpText("(Dark to Bright)")), 
-            min = 0, max = 1, 
-            value = c(0, 0.85), 
-            step = 0.05
-          ),
-          shiny::fluidRow(
-            shiny::column(width = 6,
-              shiny::numericInput("font_size", shiny::tags$span("Font Size", shiny::helpText("(pt)")),
-                value = 16
+ui <- shiny::tagList(
+  shiny::tags$head(shiny::tags$style(shiny::HTML(
+    ".navbar-nav { float: none !important; } .navbar-nav > li:nth-child(5) { float: right; }"
+  ))),
+  shiny::navbarPage(
+    theme = "yeti-bootstrap.min.css",
+    title = shiny::tags$span(shiny::tags$img(src = "insane.png", height = 18), "INSANE (INsulin Secretion ANalysEr)"),
+    windowTitle = "INSANE (INsulin Secretion ANalysEr)",
+    collapsible = TRUE,
+    id = "main_menu",
+    selected = "upload-tab",
+    ## Upload tab ------------------------------------------------------------------------------------
+    shiny::tabPanel("Upload Experiments & Plot Settings", icon = shiny::icon("file-upload"), value = "upload-tab",
+      shiny::column(width = 4,
+        card(title = "Plot Settings", body = {
+          shiny::tagList(
+            shiny::tags$img(src = "insane.png", height = 120),
+            shiny::selectInput("ggplot2_theme", "Theme", 
+              choices = ggplot2_themes[sort(names(ggplot2_themes))], 
+              selected = grep("light", ggplot2_themes, value = TRUE)
+            ),
+            shiny::radioButtons("colour_scale", shiny::tags$span("Colour Palette", shiny::helpText('(No effect on "thresholds areas")')), 
+              choices = c("Viridis", "Plasma", "Magma", "Inferno", "Grey"),
+              inline = TRUE
+            ),
+            shiny::sliderInput("colour_scale_range", shiny::tags$span("Limits of the Colour Palette", shiny::helpText("(Dark to Bright)")), 
+              min = 0, max = 1, 
+              value = c(0, 0.85), 
+              step = 0.05
+            ),
+            shiny::fluidRow(
+              shiny::column(width = 6,
+                shiny::numericInput("font_size", shiny::tags$span("Font Size", shiny::helpText("(pt)")),
+                  value = 16
+                )
+              ),
+              shiny::column(width = 6,
+                shiny::numericInput("point_size", shiny::tags$span("Point Size", shiny::helpText("(mm)")),
+                  value = 2,
+                  min = 0, max = 4, step = 0.5
+                )
               )
             ),
-            shiny::column(width = 6,
-              shiny::numericInput("point_size", shiny::tags$span("Point Size", shiny::helpText("(mm)")),
-                value = 2,
-                min = 0, max = 4, step = 0.5
-              )
-            )
-          ),
-          shiny::fluidRow(
-            shiny::column(width = 6,
-              shiny::numericInput("plot_width", shiny::tags$span("Width", shiny::helpText("(cm)")),
-                value = 16
+            shiny::fluidRow(
+              shiny::column(width = 6,
+                shiny::numericInput("plot_width", shiny::tags$span("Width", shiny::helpText("(cm)")),
+                  value = 16
+                )
+              ),
+              shiny::column(width = 6,
+                shiny::numericInput("plot_height", shiny::tags$span("Height", shiny::helpText("(cm)")),
+                  value = 12
+                )
               )
             ),
-            shiny::column(width = 6,
-              shiny::numericInput("plot_height", shiny::tags$span("Height", shiny::helpText("(cm)")),
-                value = 12
-              )
+            shiny::numericInput("plot_dpi", shiny::tags$span("Resolution", shiny::helpText("(ppi)")),
+              value = 120
             )
-          ),
-          shiny::numericInput("plot_dpi", shiny::tags$span("Resolution", shiny::helpText("(ppi)")),
-            value = 120
           )
-        )
-      })
-    ),
-    shiny::column(width = 8, align = "center",
-      shiny::fluidRow(
-        shiny::column(width = 6, align = "center",
-          card(title = "Project", body = shiny::uiOutput("project_ui"))
-        ),
-        shiny::column(width = 6, align = "center",
-          card(title = "Upload Experiments in Excel Files", body = {
-            shiny::fileInput("xlsx_files", 
-              shiny::tags$span("Choose One or Several Excel Files", 
-                shiny::helpText(shiny::downloadLink("template", "(Use only the following template!)"))
-              ), 
-              multiple = TRUE, width = "90%",
-              accept = c(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-            )
-          })
-        )
+        })
       ),
-      shiny::fluidRow(shiny::column(width = 12, align = "center", shiny::uiOutput("upload_ui")))
-    )
-  ),
-  ## Blank tab -------------------------------------------------------------------------------------
-  shiny::tabPanel("Technical Quality-Control", icon = shiny::icon("chart-line"), value = "blank-tab", 
-    shiny::sidebarLayout(
-      shiny::sidebarPanel(width = 3, 
-        shiny::tags$div(align = "center", 
-          shiny::sliderInput("od_outlier", 
-            shiny::tags$span("Optical Density (OD) Outliers Threshold", 
-              shiny::helpText(
-                "(Higher than", shiny::tags$strong("X"), 
-                "times the interquartile range above the 75", shiny::tags$sup("th", .noWS = "before"), "percentile",
-                "or",
-                "lower than", shiny::tags$strong("X"), 
-                "times the interquartile range below the 25", shiny::tags$sup("th", .noWS = "before"), "percentile)"
-              )
-            ),
-            min = 1, max = 5, value = 3, step = 0.25
-          ), 
-          shiny::sliderInput("lm_outlier", 
-            shiny::tags$span("Blank Estimates Outliers Threshold", 
-              shiny::helpText(
-                "(Higher than", shiny::tags$strong("X"), 
-                "times the interquartile range above the 75", shiny::tags$sup("th", .noWS = "before"), "percentile",
-                "or",
-                "lower than", shiny::tags$strong("X"), 
-                "times the interquartile range below the 25", shiny::tags$sup("th", .noWS = "before"), "percentile)"
-              )
-            ),
-            min = 1, max = 3, value = 1.5, step = 0.25
-          )
-        )
-      ), 
-      shiny::mainPanel(width = 9,
+      shiny::column(width = 8, align = "center",
         shiny::fluidRow(
-          shiny::column(width = 6, align = "center", 
-            plotDownloadInputUI("od_box_plot", "Optical Density (OD) Relative Error Outliers")
+          shiny::column(width = 6, align = "center",
+            card(title = "Project", body = shiny::uiOutput("project_ui"))
           ),
-          shiny::column(width = 6, align = "center", 
-            plotDownloadInputUI("od_density_plot", "Optical Density (OD) Relative Error Distribution")
+          shiny::column(width = 6, align = "center",
+            card(title = "Upload Experiments in Excel Files", body = {
+              shiny::fileInput("xlsx_files", 
+                shiny::tags$span("Choose One or Several Excel Files", 
+                  shiny::tags$ul(
+                    shiny::tags$li(
+                      shiny::helpText(shiny::downloadLink("protocol", "Experimental protocol"))
+                    ),
+                    shiny::tags$li(
+                      shiny::helpText(shiny::downloadLink("template", "Results template"))
+                    )
+                  )
+                ), 
+                multiple = TRUE, width = "90%",
+                accept = c(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+              )
+            })
+          )
+        ),
+        shiny::fluidRow(shiny::column(width = 12, align = "center", shiny::uiOutput("upload_ui")))
+      )
+    ),
+    ## Blank tab -------------------------------------------------------------------------------------
+    shiny::tabPanel("Technical Quality-Control", icon = shiny::icon("chart-line"), value = "blank-tab", 
+      shiny::sidebarLayout(
+        shiny::sidebarPanel(width = 3, 
+          shiny::tags$div(align = "center", 
+            shiny::sliderInput("od_outlier", 
+              shiny::tags$span("Optical Density (OD) Outliers Threshold", 
+                shiny::helpText(
+                  "(Higher than", shiny::tags$strong("X"), 
+                  "times the interquartile range above the 75", shiny::tags$sup("th", .noWS = "before"), "percentile",
+                  "or",
+                  "lower than", shiny::tags$strong("X"), 
+                  "times the interquartile range below the 25", shiny::tags$sup("th", .noWS = "before"), "percentile)"
+                )
+              ),
+              min = 1, max = 5, value = 3, step = 0.25
+            ), 
+            shiny::sliderInput("lm_outlier", 
+              shiny::tags$span("Blank Estimates Outliers Threshold", 
+                shiny::helpText(
+                  "(Higher than", shiny::tags$strong("X"), 
+                  "times the interquartile range above the 75", shiny::tags$sup("th", .noWS = "before"), "percentile",
+                  "or",
+                  "lower than", shiny::tags$strong("X"), 
+                  "times the interquartile range below the 25", shiny::tags$sup("th", .noWS = "before"), "percentile)"
+                )
+              ),
+              min = 1, max = 3, value = 1.5, step = 0.25
+            )
           )
         ), 
-        shiny::fluidRow(style = "padding-top: 1em;",
-          shiny::column(width = 6, align = "center",
-            plotDownloadInputUI("od_lm_box_plot", "Blank Linear Regression Outliers")
-          ),
-          shiny::column(width = 6, align = "center",
-            plotDownloadInputUI("od_lm_line_plot", "Blank Linear Regression")
+        shiny::mainPanel(width = 9,
+          shiny::fluidRow(
+            shiny::column(width = 6, align = "center", 
+              plotDownloadInputUI("od_box_plot", "Optical Density (OD) Relative Error Outliers")
+            ),
+            shiny::column(width = 6, align = "center", 
+              plotDownloadInputUI("od_density_plot", "Optical Density (OD) Relative Error Distribution")
+            )
+          ), 
+          shiny::fluidRow(style = "padding-top: 1em;",
+            shiny::column(width = 6, align = "center",
+              plotDownloadInputUI("od_lm_box_plot", "Blank Linear Regression Outliers")
+            ),
+            shiny::column(width = 6, align = "center",
+              plotDownloadInputUI("od_lm_line_plot", "Blank Linear Regression")
+            )
           )
         )
       )
-    )
-  ),
-  ## Analysis tab ----------------------------------------------------------------------------------
-  shiny::tabPanel("Insulin Secretion Analysis", icon = shiny::icon("chart-bar"), value = "is_analysis-tab", 
-    shiny::sidebarLayout(
-      shiny::sidebarPanel(width = 3, 
-        shiny::tags$div(align = "center", 
-          shiny::actionButton("show_issues", "Show Issues in the Selected Experiments"),
-          shiny::tags$hr(),
-          shiny::radioButtons("use_boxplot", "Insulin Secretion Plot Type", 
-            choiceNames = list(
-              shiny::tags$span("Boxplot", shiny::helpText("(Boxplot with points)")),
-              shiny::tags$span("Histogram", shiny::helpText("(Bars with mean and sem)"))
-            ), 
-            choiceValues = c("Boxplot", "Histogram"), 
-            inline = TRUE
-          ),
-          shiny::numericInput("fold_change",
-            shiny::tags$span('Threshold to Define "Secretion"',
-              shiny::helpText(
-                "(High/low glucose threshold above which cells are allegedly secreting insulin)"
+    ),
+    ## Analysis tab ----------------------------------------------------------------------------------
+    shiny::tabPanel("Insulin Secretion Analysis", icon = shiny::icon("chart-bar"), value = "is_analysis-tab", 
+      shiny::sidebarLayout(
+        shiny::sidebarPanel(width = 3, 
+          shiny::tags$div(align = "center", 
+            shiny::actionButton("show_issues", "Show Issues in the Selected Experiments"),
+            shiny::tags$hr(),
+            shiny::radioButtons("use_boxplot", "Insulin Secretion Plot Type", 
+              choiceNames = list(
+                shiny::tags$span("Boxplot", shiny::helpText("(Boxplot with points)")),
+                shiny::tags$span("Histogram", shiny::helpText("(Bars with mean and sem)"))
+              ), 
+              choiceValues = c("Boxplot", "Histogram"), 
+              inline = TRUE
+            ),
+            shiny::numericInput("fold_change",
+              shiny::tags$span('Threshold to Define "Secretion"',
+                shiny::helpText(
+                  "(High/low glucose threshold above which cells are allegedly secreting insulin)"
+                )
+              ),
+              value = 1, step = 0.1
+            ),
+            shiny::uiOutput("target_ui"),
+            shiny::uiOutput("experiment_ui")
+          )
+        ), 
+        shiny::mainPanel(width = 9,
+          shiny::fluidRow(
+            shiny::column(width = 5, align = "center",
+              plotDownloadInputUI("is_ratio_distribution_plot", 
+                shiny::span(
+                  "Reference Distribution", 
+                  shiny::actionLink("about_fc", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;")
+                )
               )
             ),
-            value = 1, step = 0.1
-          ),
-          shiny::uiOutput("target_ui"),
-          shiny::uiOutput("experiment_ui")
-        )
-      ), 
-      shiny::mainPanel(width = 9,
-        shiny::fluidRow(
-          shiny::column(width = 5, align = "center",
-            plotDownloadInputUI("is_ratio_distribution_plot", 
-              shiny::span(
-                "Reference Distribution", 
-                shiny::actionLink("about_fc", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;")
+            shiny::column(width = 7, align = "center",
+              plotDownloadInputUI("is_ratio_plot", 
+                shiny::span(
+                  "Insulin Secretion Results", 
+                  shiny::actionLink("about_lm", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;")
+                )
               )
             )
           ),
-          shiny::column(width = 7, align = "center",
-            plotDownloadInputUI("is_ratio_plot", 
-              shiny::span(
-                "Insulin Secretion Results", 
-                shiny::actionLink("about_lm", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;")
-              )
+          shiny::fluidRow(style = "padding-top: 1em;",
+            shiny::column(width = 12, align = "center",
+              plotDownloadInputUI("is_plot", "Insulin Secretion")
             )
-          )
-        ),
-        shiny::fluidRow(style = "padding-top: 1em;",
-          shiny::column(width = 12, align = "center",
-            plotDownloadInputUI("is_plot", "Insulin Secretion")
           )
         )
       )
+    ),
+    ## Outliers tab ----------------------------------------------------------------------------------
+    shiny::tabPanel(title = "Outliers", value = "outliers-tab",
+      card(title = shiny::tags$h4("Outliers List"), DT::dataTableOutput("outliers"))
+    ),
+    ## Protocol ----------------------------------------------------------------------------------
+    shiny::tabPanel("About", icon = shiny::icon("info"), value = "about-tab",
+      # card(title = shiny::tags$h4("Experimental Protocol"), 
+        shiny::tags$p(shiny::includeMarkdown("www/protocol.md"))
+      # )
     )
-  ),
-  ## Outliers tab ----------------------------------------------------------------------------------
-  shiny::tabPanel(title = "Outliers", value = "outliers-tab",
-    card(title = shiny::tags$h4("Outliers List"), DT::dataTableOutput("outliers"))
   )
 )
 
@@ -577,8 +595,12 @@ server <- function(input, output, session) {
 
   ## Upload tab ------------------------------------------------------------------------------------
   output$template <- shiny::downloadHandler(
-    filename = function() "endoc-bh1_template.xlsx",
+    filename = function() "insane_results_template.xlsx",
     content = function(file) file.copy(file.path("www", "template.xlsx"), file, overwrite = TRUE)
+  )
+  output$protocol <- shiny::downloadHandler(
+    filename = function() "insane_experimental_protocol.docx",
+    content = function(file) file.copy(file.path("www", "protocol.docx"), file, overwrite = TRUE)
   )
   
   xlsx_contents_summary <- shiny::reactive({
