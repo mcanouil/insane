@@ -130,3 +130,16 @@ available in an `Outliers` tab.
 
 *Note*: The `Outliers` tab is displayed only if there is at least one
 issue in the selected project.
+
+## Getting help
+
+If you encounter a clear bug, please file a minimal reproducible example
+on [github](https://github.com/mcanouil/insane/issues).  
+For questions and other discussion, please contact the package
+maintainer.
+
+-----
+
+Please note that this project is released with a [Contributor Code of
+Conduct](https://github.com/mcanouil/insane/blob/master/.github/CODE_OF_CONDUCT.md).  
+By participating in this project you agree to abide by its terms.
