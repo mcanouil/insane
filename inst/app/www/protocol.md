@@ -71,5 +71,5 @@ Ndiaye, Fatou K., Ana Ortalli, Mickaël Canouil, Marlène Huyvaert, Clara
 Salazar-Cardozo, Cécile Lecoeur, Marie Verbanck, et al. 2017.
 “Expression and Functional Assessment of Candidate Type 2 Diabetes
 Susceptibility Genes Identify Four New Genes Contributing to Human
-Insulin Secretion.” *Molecular Metabolism* 6 (6). Molecular Metabolism:
-459–70. <https://doi.org/10.1016/j.molmet.2017.03.011>.
+Insulin Secretion.” *Molecular Metabolism* 6 (6): 459–70.
+<https://doi.org/10.1016/j.molmet.2017.03.011>.
