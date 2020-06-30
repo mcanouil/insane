@@ -3,18 +3,22 @@ dir.create(file.path("www", "xlsx"), showWarnings = FALSE, mode = "0777")
 invisible(suppressPackageStartupMessages({
   sapply(
     X = c(
-      "shiny", "DT", "rlang", "ggplot2", "scales", "purrr", 
-      "dplyr", "tidyr", "glue", "readxl", "stats", "broom",
-      "ggbeeswarm", "ggpubr", "ggthemes", "utils"
+      "broom", "dplyr", "DT", "ggbeeswarm", "ggplot2", "ggpubr", 
+      "ggthemes", "glue", "grDevices", "purrr", "readxl", "shiny", 
+      "stats", "tidyr", "utils"
     ),
     FUN = library, character.only = TRUE
   )
 }))
 
+percent <- function(x) paste(round(x * 100, digits = 0), " %")
+
+`%>%` <- dplyr::`%>%`
+
 ggplot2_themes <- c(
-  paste0("ggplot2::", grep("theme_", ls("package:ggplot2"), value = TRUE), "()"),
-  paste0("ggpubr::", grep("theme_", ls("package:ggpubr"), value = TRUE), "()"),
-  paste0("ggthemes::", grep("theme_", ls("package:ggthemes"), value = TRUE), "()")
+  paste0("ggplot2::", grep("^theme_", ls("package:ggplot2"), value = TRUE), "()"),
+  paste0("ggpubr::", grep("^theme_", ls("package:ggpubr"), value = TRUE), "()"),
+  paste0("ggthemes::", grep("^theme_", ls("package:ggthemes"), value = TRUE), "()")
 ) %>% 
   setdiff(paste0("ggplot2::theme_", c("get", "set", "replace", "update"), "()")) %>% 
   setdiff(paste0("ggpubr::theme_", c("cleveland"), "()")) %>% 
@@ -158,15 +162,15 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
       values_from = "Total (ng)"
     ) %>% 
     dplyr::mutate(
-      ins_SN1 = .data[["SN1"]] / (.data[["LYSAT"]] + .data[["SN1"]] + .data[["SN2"]]),
-      ins_SN2 = .data[["SN2"]] / (.data[["LYSAT"]] + .data[["SN2"]])
+      ins_SUPERNATANT1 = .data[["SUPERNATANT1"]] / (.data[["LYSATE"]] + .data[["SUPERNATANT1"]] + .data[["SUPERNATANT2"]]),
+      ins_SUPERNATANT2 = .data[["SUPERNATANT2"]] / (.data[["LYSATE"]] + .data[["SUPERNATANT2"]])
     ) %>% 
     dplyr::ungroup() %>% 
-    dplyr::select("filename", "sheet_name", "Target", "measure_id", tidyr::num_range("ins_SN", 1:2))
+    dplyr::select("filename", "sheet_name", "Target", "measure_id", tidyr::num_range("ins_SUPERNATANT", 1:2))
   
   out_insulin <- out_insulin_tmp %>% 
     tidyr::pivot_longer(
-     cols = tidyr::num_range("ins_SN", 1:2), 
+     cols = tidyr::num_range("ins_SUPERNATANT", 1:2), 
      names_to = "Step", 
      names_pattern = "ins_(.*)",
      values_to = "Insulin Secretion (% of content)"
@@ -180,11 +184,11 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
   )
   
   out_insulin_fc <- out_insulin_tmp %>% 
-    tidyr::drop_na(tidyr::num_range("ins_SN", 1:2)) %>% 
+    tidyr::drop_na(tidyr::num_range("ins_SUPERNATANT", 1:2)) %>% 
     dplyr::group_by(.data[["filename"]], .data[["sheet_name"]], .data[["Target"]], .data[["measure_id"]]) %>% 
     dplyr::transmute(
-      "fc_sn2_sn1" = ins_SN2 / ins_SN1,
-      "log2_fc_sn2_sn1" = log2(ins_SN2 / ins_SN1)
+      "fc_SUPERNATANT2_SUPERNATANT1" = ins_SUPERNATANT2 / ins_SUPERNATANT1,
+      "log2_fc_SUPERNATANT2_SUPERNATANT1" = log2(ins_SUPERNATANT2 / ins_SUPERNATANT1)
     ) %>% 
     dplyr::ungroup()
   
@@ -197,8 +201,8 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
       is_any_outlier = .data[["is_outlier_OD"]] | 
         .data[["is_outlier_Intercept"]] | 
         .data[["is_outlier_Slope"]] |
-        (is.na(.data[["fc_sn2_sn1"]]) & !.data[["Step"]] %in% c("BLANK", "LYSAT")) |
-        (is.na(.data[["Insulin Secretion (% of content)"]]) & !.data[["Step"]] %in% c("BLANK", "LYSAT")),
+        (is.na(.data[["fc_SUPERNATANT2_SUPERNATANT1"]]) & !.data[["Step"]] %in% c("BLANK", "LYSATE")) |
+        (is.na(.data[["Insulin Secretion (% of content)"]]) & !.data[["Step"]] %in% c("BLANK", "LYSATEE")),
       Sample = gsub("mM ", "mM\n", .data[["Sample"]])
     ) %>% 
     dplyr::group_by(.data[["filename"]], .data[["sheet_name"]]) %>% 
@@ -223,7 +227,8 @@ get_outliers <- function(data, fold_change) {
         dplyr::filter(Type %in% "Reference") %>% 
         dplyr::group_by(.data[["filename"]]) %>% 
         dplyr::summarise(
-          is_reference_good = mean(.data[["fc_sn2_sn1"]], na.rm = TRUE) >= fold_change
+          is_reference_good = mean(.data[["fc_SUPERNATANT2_SUPERNATANT1"]], na.rm = TRUE) >= fold_change,
+          .groups = "drop_last"
         ) %>% 
         dplyr::ungroup() %>% 
         dplyr::select(c("filename", "is_reference_good")),
@@ -244,7 +249,8 @@ get_outliers <- function(data, fold_change) {
     dplyr::summarise(
       "Blank Linearity" = any(.data[["is_outlier_Intercept"]] | .data[["is_outlier_Slope"]]),
       "Technical Variability (OD)" = any(.data[["is_outlier_OD"]]),
-      "Not Secreting Insulin in Reference" = any(!.data[["is_reference_good"]])
+      "Not Secreting Insulin in Reference" = any(!.data[["is_reference_good"]]),
+      .groups = "drop_last"
     )
 }
 
@@ -257,7 +263,7 @@ ui <- shiny::navbarPage(
   id = "main_menu",
   selected = "upload-tab",
   ## Upload tab ------------------------------------------------------------------------------------
-  shiny::tabPanel("Upload Experiments & Plot Settings", icon = shiny::icon("file-upload"), value = "upload-tab",
+  shiny::tabPanel("Experiments Upload & Plot Settings", icon = shiny::icon("file-upload"), value = "upload-tab",
     shiny::column(width = 4,
       card(title = "Plot Settings", body = {
         shiny::tagList(
@@ -323,7 +329,7 @@ ui <- shiny::navbarPage(
           card(title = "Project", body = shiny::uiOutput("project_ui"))
         ),
         shiny::column(width = 6, align = "center",
-          card(title = "Upload Experiments in Excel Files", body = {
+          card(title = "Upload Experiments from Excel Files", body = {
             shiny::fileInput("xlsx_files", "Choose One or Several Excel Files", 
               multiple = TRUE, width = "90%",
               accept = c(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
@@ -416,7 +422,7 @@ ui <- shiny::navbarPage(
         shiny::fluidRow(
           shiny::column(width = 5, align = "center",
             plotDownloadInputUI("is_ratio_distribution_plot", 
-              shiny::span(
+              shiny::tags$span(
                 "Reference Distribution", 
                 shiny::actionLink("about_fc", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;")
               )
@@ -424,7 +430,7 @@ ui <- shiny::navbarPage(
           ),
           shiny::column(width = 7, align = "center",
             plotDownloadInputUI("is_ratio_plot", 
-              shiny::span(
+              shiny::tags$span(
                 "Insulin Secretion Results", 
                 shiny::actionLink("about_lm", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;")
               )
@@ -502,7 +508,7 @@ server <- function(input, output, session) {
   })
 
   shiny::observe({
-    pdf(NULL)
+    grDevices::pdf(NULL)
     shiny::req(
       input[["targets_list"]], input[["experiments_list"]],
       input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]],
@@ -521,7 +527,7 @@ server <- function(input, output, session) {
         )
       }
     )
-    dev.off()
+    grDevices::dev.off()
   })
   
   shiny::observe({
@@ -628,9 +634,9 @@ server <- function(input, output, session) {
         filename = basename(.data[["file"]])
       ) %>% 
       dplyr::group_by(.data[["Project"]], .data[["filename"]], .data[["file"]]) %>% 
-      dplyr::summarise_at(
-        .vars = dplyr::vars(.data[["sheet_name"]]), 
-        .funs = ~ glue::glue_collapse(.x, sep = ", ", last = " and ")
+      dplyr::summarise(
+        sheet_name = glue::glue_collapse(.data[["sheet_name"]], sep = ", ", last = " and "),
+        .groups = "drop_last"
       ) %>% 
       dplyr::ungroup()
   })
@@ -733,7 +739,7 @@ server <- function(input, output, session) {
         size = input[["point_size"]],
         groupOnX = TRUE
       ) +
-      ggplot2::scale_y_continuous(labels = scales::percent) +
+      ggplot2::scale_y_continuous(labels = percent) +
       ggplot2_colour() +
       ggplot2_fill() +
       ggplot2::labs(
@@ -776,8 +782,8 @@ server <- function(input, output, session) {
       ggplot2::geom_vline(xintercept = 0, linetype = 2) +
       ggplot2::geom_density(alpha = 0.2) +
       ggplot2::geom_density(mapping = ggplot2::aes(colour = "ALL", fill = "ALL"), alpha = 0.2) +
-      ggplot2::scale_x_continuous(labels = scales::percent, expand = ggplot2::expand_scale(mult = c(0, 0))) +
-      ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(mult = c(0, 0.05))) +
+      ggplot2::scale_x_continuous(labels = percent, expand = ggplot2::expansion(mult = c(0, 0))) +
+      ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.05))) +
       ggplot2_colour() +
       ggplot2_fill() +
       ggplot2::labs(
@@ -865,7 +871,7 @@ server <- function(input, output, session) {
       ) +
       ggplot2::geom_smooth(
         data = ~ dplyr::filter(.x, !(.data[["is_outlier_OD"]] | .data[["is_outlier_Intercept"]] | .data[["is_outlier_Slope"]])),
-        method = "lm", se = FALSE
+        method = "lm", se = FALSE, formula = y ~ x
       ) +
       ggplot2::geom_point(
         data = ~ dplyr::filter(.x, (.data[["is_outlier_OD"]] | .data[["is_outlier_Intercept"]] | .data[["is_outlier_Slope"]])),
@@ -875,7 +881,7 @@ server <- function(input, output, session) {
       ggplot2::geom_smooth(
         data = ~ dplyr::filter(.x, (.data[["is_outlier_OD"]] | .data[["is_outlier_Intercept"]] | .data[["is_outlier_Slope"]])),
         colour = "firebrick2", 
-        method = "lm", se = FALSE
+        method = "lm", se = FALSE, formula = y ~ x
       ) +
       ggplot2_colour() +
       ggplot2::scale_x_log10() +
@@ -935,7 +941,8 @@ server <- function(input, output, session) {
         dplyr::filter(Type %in% "Reference") %>% 
         dplyr::group_by(.data[["filename"]]) %>% 
         dplyr::summarise(
-          is_reference_good = mean(.data[["fc_sn2_sn1"]], na.rm = TRUE) >= input[["fold_change"]]
+          is_reference_good = mean(.data[["fc_SUPERNATANT2_SUPERNATANT1"]], na.rm = TRUE) >= input[["fold_change"]],
+          .groups = "drop_last"
         ) %>% 
         dplyr::ungroup() %>% 
         dplyr::select(c("filename", "is_reference_good")),
@@ -976,9 +983,9 @@ server <- function(input, output, session) {
       dplyr::filter(
         .data[["Type"]] %in% "Reference",
         !.data[["is_any_outlier"]],
-        .data[["Step"]] %in% "SN2"
+        .data[["Step"]] %in% "SUPERNATANT2"
       ) %>%
-      dplyr::select(c("filename", "Type_Target", "Condition", "fc_sn2_sn1")) %>%
+      dplyr::select(c("filename", "Type_Target", "Condition", "fc_SUPERNATANT2_SUPERNATANT1")) %>%
       dplyr::distinct() %>% 
       dplyr::mutate(facet_file = gsub(".xlsx$", "", gsub("_", "\n", .data[["filename"]])))
 
@@ -986,7 +993,7 @@ server <- function(input, output, session) {
       data = gg_data,
       mapping = ggplot2::aes(
         x = .data[["Type_Target"]],
-        y = .data[["fc_sn2_sn1"]]
+        y = .data[["fc_SUPERNATANT2_SUPERNATANT1"]]
       )
     ) +
       ggplot2_theme() +
@@ -1016,7 +1023,7 @@ server <- function(input, output, session) {
         shape = 1
       ) +
       ggplot2::scale_x_discrete(labels = (function(x) gsub(".*: ", "", x))) +
-      ggplot2::scale_y_continuous(limits = c(0, NA), expand = ggplot2::expand_scale(mult = c(0, 0.05))) +
+      ggplot2::scale_y_continuous(limits = c(0, NA), expand = ggplot2::expansion(mult = c(0, 0.05))) +
       ggplot2_colour() +
       ggplot2_fill() +
       ggplot2::labs(
@@ -1108,7 +1115,7 @@ server <- function(input, output, session) {
               show.legend = FALSE,
               vjust = 1.25
             ),
-            ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(mult = c(0, 0.05)))
+            ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.05)))
           )
         }
       } +
@@ -1153,7 +1160,7 @@ server <- function(input, output, session) {
 
     ggplot2::ggplot(
       data = xlsx_contents_selected %>%
-        dplyr::filter(Step %in% c("SN1", "SN2")) %>% 
+        dplyr::filter(Step %in% c("SUPERNATANT1", "SUPERNATANT2")) %>% 
         dplyr::select(c("Sample", "Type_Target", "Insulin Secretion (% of content)", "Date", "Operator")) %>%
         dplyr::distinct(),
       mapping = ggplot2::aes(
@@ -1179,7 +1186,7 @@ server <- function(input, output, session) {
               position = ggplot2::position_jitterdodge(dodge.width = 0.9, jitter.width = 0.25),
               na.rm = TRUE
             ),
-            ggplot2::scale_y_continuous(labels = scales::percent)
+            ggplot2::scale_y_continuous(labels = percent)
           )
         } else {
           list(
@@ -1208,8 +1215,8 @@ server <- function(input, output, session) {
               vjust = 1.25
             ),
             ggplot2::scale_y_continuous(
-              labels = scales::percent,
-              expand = ggplot2::expand_scale(mult = c(0, 0.05))
+              labels = percent,
+              expand = ggplot2::expansion(mult = c(0, 0.05))
             )
           )
         }
@@ -1261,9 +1268,9 @@ server <- function(input, output, session) {
 
     gg_data <- xlsx_contents_selected %>%
       tidyr::drop_na(.data[["Type"]], .data[["Target"]]) %>%
-      dplyr::select(c("Condition", "Type_Target", "fc_sn2_sn1", "Date", "Operator")) %>%
+      dplyr::select(c("Condition", "Type_Target", "fc_SUPERNATANT2_SUPERNATANT1", "Date", "Operator")) %>%
       dplyr::distinct() %>%
-      tidyr::drop_na(.data[["fc_sn2_sn1"]])
+      tidyr::drop_na(.data[["fc_SUPERNATANT2_SUPERNATANT1"]])
 
     if (length(unique(gg_data[["Type_Target"]])) > 1) {
       lm_data <- gg_data %>%
@@ -1283,20 +1290,22 @@ server <- function(input, output, session) {
                     mean_se_fc <- splitted_data %>%
                       dplyr::group_by(.data[["Type_Target"]]) %>%
                       dplyr::summarise(
-                        mean_se = max(.data[["fc_sn2_sn1"]])
+                        mean_se = max(.data[["fc_SUPERNATANT2_SUPERNATANT1"]]),
+                        .groups = "drop_last"
                       ) %>%
                       dplyr::ungroup()
                   } else {
                     mean_se_fc <- splitted_data %>%
                       dplyr::group_by(.data[["Type_Target"]]) %>%
                       dplyr::summarise(
-                        mean_se = mean(.data[["fc_sn2_sn1"]]) +
-                          sqrt(stats::var(.data[["fc_sn2_sn1"]]) / length(.data[["fc_sn2_sn1"]]))
+                        mean_se = mean(.data[["fc_SUPERNATANT2_SUPERNATANT1"]]) +
+                          sqrt(stats::var(.data[["fc_SUPERNATANT2_SUPERNATANT1"]]) / length(.data[["fc_SUPERNATANT2_SUPERNATANT1"]])),
+                        .groups = "drop_last"
                       ) %>%
                       dplyr::ungroup()
                   }
   
-                  default_formula <- fc_sn2_sn1 ~ Type_Target
+                  default_formula <- fc_SUPERNATANT2_SUPERNATANT1 ~ Type_Target
                   if (length(unique(splitted_data[["Date"]])) > 1) {
                     splitted_data[["Date"]] <- as.factor(splitted_data[["Date"]])
                     default_formula <- stats::update.formula(default_formula, . ~ . + Date)
@@ -1340,7 +1349,7 @@ server <- function(input, output, session) {
       data = gg_data,
       mapping = ggplot2::aes(
         x = .data[["Type_Target"]],
-        y = .data[["fc_sn2_sn1"]],
+        y = .data[["fc_SUPERNATANT2_SUPERNATANT1"]],
         colour = .data[["Type_Target"]],
         fill = .data[["Type_Target"]],
         group = .data[["Type_Target"]]
@@ -1387,7 +1396,7 @@ server <- function(input, output, session) {
               show.legend = FALSE,
               vjust = 1.25
             ),
-            ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(mult = c(0, 0.05)))
+            ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.05)))
           )
         }
       } +
