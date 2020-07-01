@@ -16,7 +16,7 @@ go_insane(
 )
 }
 \arguments{
-\item{with_examples}{[\link{logical}] A boolean indicating if examples should be copied in the App.}
+\item{with_examples}{[\link{logical}] A logical indicating if examples should be copied in the App.}
 
 \item{port}{The TCP port that the application should listen on. If the
 \code{port} is not specified, and the \code{shiny.port} option is set (with
