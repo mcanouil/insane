@@ -489,7 +489,7 @@ server <- function(input, output, session) {
       input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]],
       od_box_plot(), od_density_plot(), od_lm_box_plot(), od_lm_line_plot()
     )
-    purrr::map2(
+    purrr::walk2(
       .x = list(
         "od_box_plot", "od_density_plot", "od_lm_box_plot", "od_lm_line_plot"
       ),
@@ -514,7 +514,7 @@ server <- function(input, output, session) {
       input[["fold_change"]], input[["font_size"]],
       is_ratio_distribution_plot(), is_plot(), is_ratio_plot()
     )
-    purrr::map2(
+    purrr::walk2(
       .x = list("is_ratio_distribution_plot", "is_plot", "is_ratio_plot"),
       .y = list(is_ratio_distribution_plot(), is_plot(), is_ratio_plot()),
       .f = function(.x, .y) {
@@ -1240,11 +1240,12 @@ server <- function(input, output, session) {
   })
 
   is_plot <- shiny::reactive({
-    ggpubr::ggarrange(
-      is_od_plot(), is_percent_plot(),
-      nrow = 1, ncol = 2, align = "v",
-      legend = "top", common.legend = TRUE
-    )
+    patchwork::wrap_plots(
+      is_od_plot() + ggplot2::theme(legend.direction = "horizontal"), 
+      is_percent_plot() + ggplot2::theme(legend.direction = "horizontal"),
+      nrow = 1, ncol = 2, guides = "collect"
+    ) +
+      patchwork::plot_annotation(theme = ggplot2::theme(legend.position = "top"))
   })
   
   is_ratio_plot <- shiny::reactive({
