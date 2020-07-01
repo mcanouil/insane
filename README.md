@@ -104,11 +104,11 @@ Conditions are compared using a linear regression with `Date` and
 
   - Using all experiments in the selected project
     
-      - Histogram version
+      - Boxplot version
         
         <img src="man/figures/README-app_003.png" width="50%" />
     
-      - Boxplot version
+      - Histogram version
         
         <img src="man/figures/README-app_004.png" width="50%" />
 
@@ -121,14 +121,14 @@ quality-controls, a summary of the issues regarding the selected
 experiments can be displayed using the button `Show Issues in the
 Selected Experiments`.
 
-<img src="man/figures/README-app_006.png" width="100%" />
+<img src="man/figures/README-app_006.png" width="50%" /><img src="man/figures/README-app_007.png" width="50%" />
 
 #### List of Outliers (Issues Detected) ([top](#overview))
 
 A comprehensive list of all issues detected in the selected project is
 available in an `Outliers` tab.
 
-<img src="man/figures/README-app_007.png" width="100%" />
+<img src="man/figures/README-app_008.png" width="100%" />
 
 *Note*: The `Outliers` tab is displayed only if there is at least one
 issue in the selected project.
