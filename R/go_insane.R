@@ -9,19 +9,18 @@
 #' @export
 #' 
 #' @importFrom broom tidy
-#' @import dplyr
+#' @importFrom dplyr `%>%` tibble mutate filter group_by ungroup do full_join n select transmute arrange summarise distinct bind_rows matches num_range across
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom ggbeeswarm geom_beeswarm geom_quasirandom
 #' @import ggplot2
 #' @import ggpubr
 #' @import ggthemes
 #' @importFrom glue glue glue_collapse
-#' @importFrom grDevices pdf dev.off
 #' @importFrom purrr set_names pmap map map2 map2_dbl map2_chr map2_df
 #' @importFrom readxl read_xlsx
 #' @importFrom shiny tags NS downloadButton callModule downloadHandler navbarPage tabPanel column tagList selectInput radioButtons helpText sliderInput fluidRow numericInput downloadLink downloadLink fileInput uiOutput sidebarLayout sidebarPanel mainPanel actionButton icon actionLink observeEvent showModal modalDialog observe req hideTab showTab reactive renderUI showNotification removeNotification shinyApp runApp
 #' @importFrom stats quantile IQR lm na.omit var update.formula
-#' @importFrom tidyr unnest pivot_wider num_range pivot_longer drop_na replace_na nest
+#' @importFrom tidyr unnest pivot_wider pivot_longer drop_na replace_na nest
 #' @importFrom utils getFromNamespace combn
 #'
 #' @examples

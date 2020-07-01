@@ -4,7 +4,7 @@ invisible(suppressPackageStartupMessages({
   sapply(
     X = c(
       "broom", "dplyr", "DT", "ggbeeswarm", "ggplot2", "ggpubr", 
-      "ggthemes", "glue", "grDevices", "purrr", "readxl", "shiny", 
+      "ggthemes", "glue","purrr", "readxl", "shiny", 
       "stats", "tidyr", "utils"
     ),
     FUN = library, character.only = TRUE
@@ -166,11 +166,11 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
       ins_SUPERNATANT2 = .data[["SUPERNATANT2"]] / (.data[["LYSATE"]] + .data[["SUPERNATANT2"]])
     ) %>% 
     dplyr::ungroup() %>% 
-    dplyr::select("filename", "sheet_name", "Target", "measure_id", tidyr::num_range("ins_SUPERNATANT", 1:2))
+    dplyr::select("filename", "sheet_name", "Target", "measure_id", dplyr::num_range("ins_SUPERNATANT", 1:2))
   
   out_insulin <- out_insulin_tmp %>% 
     tidyr::pivot_longer(
-     cols = tidyr::num_range("ins_SUPERNATANT", 1:2), 
+     cols = dplyr::num_range("ins_SUPERNATANT", 1:2), 
      names_to = "Step", 
      names_pattern = "ins_(.*)",
      values_to = "Insulin Secretion (% of content)"
@@ -184,7 +184,7 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
   )
   
   out_insulin_fc <- out_insulin_tmp %>% 
-    tidyr::drop_na(tidyr::num_range("ins_SUPERNATANT", 1:2)) %>% 
+    tidyr::drop_na(dplyr::num_range("ins_SUPERNATANT", 1:2)) %>% 
     dplyr::group_by(.data[["filename"]], .data[["sheet_name"]], .data[["Target"]], .data[["measure_id"]]) %>% 
     dplyr::transmute(
       "fc_SUPERNATANT2_SUPERNATANT1" = ins_SUPERNATANT2 / ins_SUPERNATANT1,
@@ -306,7 +306,7 @@ ui <- shiny::navbarPage(
               )
             )
           ),
-          shiny::numericInput("plot_dpi", shiny::tags$span("Resolution", shiny::helpText("(ppi)")),
+          shiny::numericInput("plot_dpi", shiny::tags$span("Resolution", shiny::helpText("(dpi)")),
             value = 120
           )
         )
@@ -317,9 +317,9 @@ ui <- shiny::navbarPage(
         shiny::column(width = 12, align = "center",
           card(title = "Useful Files", body = {
             shiny::tagList(
-              shiny::tags$p("The experimental protocol (.docx): ", shiny::downloadLink("protocol", "download here!")),
+              shiny::tags$p("The experimental protocol (docx): ", shiny::downloadLink("protocol", "download here!")),
               shiny::tags$br(),
-              shiny::tags$p("The results template (.xlsx): ", shiny::downloadLink("template", "download here!"))
+              shiny::tags$p("The results template (xlsx): ", shiny::downloadLink("template", "download here!"))
             )
           })
         )
@@ -462,8 +462,8 @@ server <- function(input, output, session) {
         "For each experiments", 
         "(", shiny::tags$i("i.e.", .noWS = "outside"), ", an Excel spreadsheet)", 
         "cells are considered not secreting insulin in", shiny::tags$code("Reference"), 
-        "(", shiny::tags$code('Type=="Reference"', .noWS = "outside"), ")",
-        "when the mean of the optical density measures for a", shiny::tags$code("Condition"),
+        "(", shiny::tags$code('Type = "Reference"', .noWS = "outside"), ")",
+        "when the mean of the optical density measurements for a", shiny::tags$code("Condition"),
         "in a", shiny::tags$code("Step"), "is strictly below the defined threshold."
       ),
       easyClose = TRUE
@@ -477,7 +477,7 @@ server <- function(input, output, session) {
         shiny::tags$code("Date"),
         'and',
         shiny::tags$code("Operator"),
-        'as covariate if needed.'
+        'as covariate, if needed.'
         
       ),
       easyClose = TRUE
@@ -508,7 +508,6 @@ server <- function(input, output, session) {
   })
 
   shiny::observe({
-    grDevices::pdf(NULL)
     shiny::req(
       input[["targets_list"]], input[["experiments_list"]],
       input[["plot_dpi"]], input[["plot_height"]], input[["plot_dpi"]],
@@ -527,7 +526,6 @@ server <- function(input, output, session) {
         )
       }
     )
-    grDevices::dev.off()
   })
   
   shiny::observe({
@@ -849,7 +847,11 @@ server <- function(input, output, session) {
       ggplot2::labs(x = NULL, y = "Estimate") +
       ggplot2::facet_wrap(facets = ggplot2::vars(.data[["term"]]), scales = "free") +
       ggplot2::theme(axis.text.x = ggplot2::element_blank()) +
-      ggplot2::theme(legend.position = "none")
+      ggplot2::theme(
+        legend.position = "none", 
+        panel.grid.major.x = ggplot2::element_blank(), 
+        axis.ticks.x  = ggplot2::element_blank()
+      )
   })
   
   od_lm_line_plot <- shiny::reactive({
@@ -1325,10 +1327,10 @@ server <- function(input, output, session) {
                     )
                 }
               ) %>%
-                dplyr::mutate_at(
-                  .vars = dplyr::vars(dplyr::num_range("group", 1:2)),
-                  .funs = ~ factor(.x, levels = levels(data[["Type_Target"]]))
-                )
+                dplyr::mutate(dplyr::across(
+                  .cols = dplyr::num_range("group", 1:2),
+                  .fns = ~ factor(.x, levels = levels(data[["Type_Target"]]))
+                ))
             }
           }),
           data = NULL
@@ -1416,7 +1418,7 @@ server <- function(input, output, session) {
       ) +
       {
         if (length(unique(gg_data[["Type_Target"]])) > 1 && nrow(lm_data) > 0) {
-          ggsignif::geom_signif(
+          ggpubr::geom_signif(
             data = dplyr::mutate(lm_data, group = 1:dplyr::n()),
             mapping = ggplot2::aes(
               y_position = .data[["y_position"]],
