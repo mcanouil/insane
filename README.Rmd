@@ -121,16 +121,16 @@ knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_001.png")
 
 #### Technical Quality-Control ([top](#overview))
 
-__insane__ performs technical quality-control of the optical density measured in each steps of the experiments, *e.g.*:
+__insane__ performs technical quality-control of the optical density measured in each steps of the experiments:
 
 * blank (*BLANK*), 
-* lysat (*LYSAT*), 
-* supernatant (*SN1* and *SN2*).  
+* lysat (*LYSATE*), 
+* supernatant (*SUPERNATANT1* and *SUPERNATANT2*).  
 
 This technical quality-control step checks:
 
 * the variability among the duplicated optical density measures of each samples;
-* the variability in the blank curves (intercept and slope estimated) among all experiments in a project.
+* the variability in the blank curves (intercept and slope estimates) among all experiments in a project.
 
 ```{r, echo = FALSE}
 knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_002.png"))
@@ -138,7 +138,7 @@ knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_002.png")
 
 #### Statistical analyses ([top](#overview))
 
-__insane__ performs statistical analyses of the experimental conditions (if more than one), *e.g.* one silenced gene (*siGENE*) compared to an insulin secretion *reference* (*siNTP*) in two stimulation conditions (*Glc* and *Glc + IBMX*).
+__insane__ performs statistical analyses of the experimental conditions, *e.g.*, one silenced gene (*siGENE*) compared to an insulin secretion *reference* (*siNTP*) in two stimulation conditions (*Glc* and *Glc + A*).
 
 Conditions are compared using a linear regression with `Date` and `Operator` as covariates (if needed) to control for heterogeneity.
 
@@ -146,19 +146,19 @@ Conditions are compared using a linear regression with `Date` and `Operator` as 
 
     * Boxplot version
     
-        ```{r, echo = FALSE, out.width = "50%"}
+        ```{r, echo = FALSE, out.width = "65%"}
         knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_003.png"))
         ```
 
     * Histogram version
     
-        ```{r, echo = FALSE, out.width = "50%"}
+        ```{r, echo = FALSE, out.width = "65%"}
         knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_004.png"))
         ```
 
 * Using some of the experiments in the selected project
 
-    ```{r, echo = FALSE, out.width = "50%"}
+    ```{r, echo = FALSE, out.width = "65%"}
     knitr::include_graphics(paste0(knitr::opts_chunk$get("fig.path"), "app_005.png"))
     ```
 
