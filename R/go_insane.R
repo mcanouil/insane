@@ -15,6 +15,7 @@
 #' @import ggplot2
 #' @import ggpubr
 #' @import ggthemes
+#' @importFrom patchwork plot_annotation wrap_plots
 #' @importFrom glue glue glue_collapse
 #' @importFrom purrr set_names pmap map map2 map2_dbl map2_chr map2_df
 #' @importFrom readxl read_xlsx
