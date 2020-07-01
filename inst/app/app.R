@@ -284,7 +284,7 @@ ui <- shiny::navbarPage(
           shiny::fluidRow(
             shiny::column(width = 6,
               shiny::numericInput("font_size", shiny::tags$span("Font Size", shiny::helpText("(pt)")),
-                value = 16
+                value = 12
               )
             ),
             shiny::column(width = 6,
