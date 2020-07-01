@@ -32,7 +32,7 @@
 #' }
 #'
 go_insane <- function(
-  with_examples = FALSE,
+  demo = FALSE,
   port = getOption("shiny.port"),
   launch.browser = getOption("shiny.launch.browser", interactive()),
   host = getOption("shiny.host", "127.0.0.1"), 
@@ -47,7 +47,7 @@ go_insane <- function(
 
   app_name <- paste0("app_", floor(as.numeric(Sys.time())))
   on.exit(unlink(file.path(tempdir(), app_name), recursive = TRUE))
-  deploy(directory = tempdir(), app_name = app_name, with_examples = with_examples)
+  deploy(directory = tempdir(), app_name = app_name, demo = demo)
 
   shiny::runApp(
     appDir = file.path(tempdir(), app_name), 

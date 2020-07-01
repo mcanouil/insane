@@ -7,7 +7,7 @@
 deploy(
   directory = "/srv/shiny-server",
   app_name = "insane",
-  with_examples = FALSE,
+  demo = FALSE,
   overwrite = FALSE
 )
 }
@@ -16,7 +16,7 @@ deploy(
 
 \item{app_name}{[\link{character}] A character vector defining the shiny application name in the new location.}
 
-\item{with_examples}{[\link{logical}] A logical indicating if examples should be copied in the App.}
+\item{demo}{[\link{logical}] A logical indicating if examples spreadsheets should be copied in the app.}
 
 \item{overwrite}{[\link{logical}] A logical indicating if existing destination files should be overwritten.}
 }
