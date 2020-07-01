@@ -77,27 +77,27 @@ projects separately.
 #### Technical Quality-Control ([top](#overview))
 
 **insane** performs technical quality-control of the optical density
-measured in each steps of the experiments, *e.g.*:
+measured in each steps of the experiments:
 
   - blank (*BLANK*),
-  - lysat (*LYSAT*),
-  - supernatant (*SN1* and *SN2*).
+  - lysat (*LYSATE*),
+  - supernatant (*SUPERNATANT1* and *SUPERNATANT2*).
 
 This technical quality-control step checks:
 
   - the variability among the duplicated optical density measures of
     each samples;
-  - the variability in the blank curves (intercept and slope estimated)
+  - the variability in the blank curves (intercept and slope estimates)
     among all experiments in a project.
 
 <img src="man/figures/README-app_002.png" width="100%" />
 
 #### Statistical analyses ([top](#overview))
 
-**insane** performs statistical analyses of the experimental conditions
-(if more than one), *e.g.* one silenced gene (*siGENE*) compared to an
-insulin secretion *reference* (*siNTP*) in two stimulation conditions
-(*Glc* and *Glc + IBMX*).
+**insane** performs statistical analyses of the experimental conditions,
+*e.g.*, one silenced gene (*siGENE*) compared to an insulin secretion
+*reference* (*siNTP*) in two stimulation conditions (*Glc* and *Glc +
+A*).
 
 Conditions are compared using a linear regression with `Date` and
 `Operator` as covariates (if needed) to control for heterogeneity.
@@ -106,15 +106,15 @@ Conditions are compared using a linear regression with `Date` and
     
       - Boxplot version
         
-        <img src="man/figures/README-app_003.png" width="50%" />
+        <img src="man/figures/README-app_003.png" width="65%" />
     
       - Histogram version
         
-        <img src="man/figures/README-app_004.png" width="50%" />
+        <img src="man/figures/README-app_004.png" width="65%" />
 
   - Using some of the experiments in the selected project
     
-    <img src="man/figures/README-app_005.png" width="50%" />
+    <img src="man/figures/README-app_005.png" width="65%" />
 
 If and when some experiments are failing any of the technical
 quality-controls, a summary of the issues regarding the selected
