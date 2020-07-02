@@ -1,15 +1,22 @@
 dir.create(file.path("www", "xlsx"), showWarnings = FALSE, mode = "0777")
 
-invisible(suppressPackageStartupMessages({
-  sapply(
-    X = c(
-      "broom", "dplyr", "DT", "ggbeeswarm", "ggplot2", "ggpubr", 
-      "ggthemes", "glue","purrr", "readxl", "shiny", 
-      "stats", "tidyr", "utils"
-    ),
-    FUN = library, character.only = TRUE
-  )
-}))
+suppressPackageStartupMessages({
+    library("broom")
+    library("broom")
+    library("dplyr")
+    library("DT")
+    library("ggbeeswarm")
+    library("ggplot2")
+    library("ggpubr")
+    library("ggthemes")
+    library("glue")
+    library("purrr")
+    library("readxl")
+    library("shiny")
+    library("stats")
+    library("tidyr")
+    library("utils")
+})
 
 percent <- function(x) paste(round(x * 100, digits = 0), " %")
 
