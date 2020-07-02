@@ -28,17 +28,10 @@ deploy <- function(directory = "/srv/shiny-server", app_name = "insane", demo = 
     recursive = TRUE
   ))
   
-  dir.create(file.path(directory, app_name, "www", "xlsx"), showWarnings = FALSE, recursive = TRUE)
-  
-  if (demo) {
-    out <- all(c(out, file.copy(
-      from = list.files(system.file("extdata", package = "insane"), full.names = TRUE, recursive = TRUE),
-      to = file.path(directory, app_name, "www", "xlsx"),
-      overwrite = overwrite, 
-      recursive = TRUE
-    )))
+  if (!demo) {
+    unlink(normalizePath(file.path(directory, app_name, "www", "xlsx")), recursive = TRUE)
   }
-  
+  dir.create(file.path(directory, app_name, "www", "xlsx"), showWarnings = FALSE, recursive = TRUE)
   Sys.chmod(normalizePath(file.path(directory, app_name, "www")), use_umask = FALSE)
   Sys.chmod(normalizePath(file.path(directory, app_name, "www", "xlsx")), use_umask = FALSE)
   
