@@ -28,7 +28,7 @@ deploy <- function(directory = "/srv/shiny-server", app_name = "insane", demo = 
     recursive = TRUE
   ))
   
-  dir.create(normalizePath(file.path(directory, app_name, "www", "xlsx")), showWarnings = FALSE)
+  dir.create(file.path(directory, app_name, "www", "xlsx"), showWarnings = FALSE, recursive = TRUE)
   
   if (demo) {
     out <- all(c(out, file.copy(
