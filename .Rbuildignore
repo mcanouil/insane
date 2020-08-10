@@ -19,5 +19,6 @@
 ^docs$
 ^doc$
 ^Meta$
-^article$
+^article_diabetologia
 ^inst/app/rsconnect$
+^canouil_et_al$
