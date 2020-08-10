@@ -11,9 +11,9 @@ output:
     fig_width: 6.3
     fig_height: 4.7
 vignette: >
+  %\VignetteEncoding{UTF-8}
   %\VignetteIndexEntry{insane: INsulin Secretion ANalysEr}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r logo, echo = FALSE, out.width = "150px"}
+```{r logo, echo = FALSE, out.width = "150px", fig.align = "center"}
 knitr::include_graphics(path = "insane.png")
 ```
 
@@ -64,16 +64,16 @@ knitr::include_graphics("README-app_001.png")
 
 ### Technical Quality-Control
 
-__insane__ performs technical quality-control of the optical density measured in each steps of the experiments, *e.g.*:
+__insane__ performs technical quality-control of the optical density measured in each steps of the experiments:
 
 * blank (*BLANK*), 
-* lysat (*LYSAT*), 
-* supernatant (*SN1* and *SN2*).  
+* lysat (*LYSATE*), 
+* supernatant (*SUPERNATANT1* and *SUPERNATANT2*).  
 
 This technical quality-control step checks:
 
 * the variability among the duplicated optical density measures of each samples;
-* the variability in the blank curves (intercept and slope estimated) among all experiments in a project.
+* the variability in the blank curves (intercept and slope estimates) among all experiments in a project.
 
 ```{r, echo = FALSE}
 knitr::include_graphics("README-app_002.png")
@@ -81,19 +81,19 @@ knitr::include_graphics("README-app_002.png")
 
 ### Statistical analyses
 
-__insane__ performs statistical analyses of the experimental conditions (if more than one), *e.g.* one silenced gene (*siGENE*) compared to an insulin secretion *reference* (*siNTP*) in two stimulation conditions (*Glc* and *Glc + IBMX*).
+__insane__ performs statistical analyses of the experimental conditions, *e.g.*, one silenced gene (*siGENE*) compared to an insulin secretion *reference* (*siNTP*) in two stimulation conditions (*Glc* and *Glc + A*).
 
 Conditions are compared using a linear regression with `Date` and `Operator` as covariates (if needed) to control for heterogeneity.
 
 * Using all experiments in the selected project
 
-    * Histogram version
+    * Boxplot version
     
         ```{r, echo = FALSE, out.width = "50%"}
         knitr::include_graphics("README-app_003.png")
         ```
 
-    * Boxplot version
+    * Histogram version
     
         ```{r, echo = FALSE, out.width = "50%"}
         knitr::include_graphics("README-app_004.png")

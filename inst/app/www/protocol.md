@@ -1,3 +1,5 @@
+<img src="insane.png" width="150px" style="display: block; margin: auto;" />
+
 ### Experimental Protocol
 
 #### Culture of EndoC-βH1 cells
