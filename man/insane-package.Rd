@@ -6,7 +6,14 @@
 \alias{insane-package}
 \title{insane: INsulin Secretion ANalysEr}
 \description{
-A user-friendly interface, using Shiny, to analyse insulin secretion in cells.
+A user-friendly interface, using Shiny, to analyse glucose-stimulated insulin secretion (GSIS) 
+    assays in pancreatic beta cells or islets.
+    The package allows the user to import several sets of experiments from different spreadsheets 
+    and to perform subsequent steps: summarise in a tidy format, visualise data quality 
+    and compare experimental conditions without omitting to account for technical confounders 
+    such as the date of the experiment or the technician.
+    Together, insane is a comprehensive method that optimises pre-processing and analyses of 
+    GSIS experiments in a friendly-user interface.
     The Shiny App was initially designed for EndoC-betaH1 cell line following method described 
     in Ndiaye et al., 2017 (<doi:10.1016/j.molmet.2017.03.011>).
 }
