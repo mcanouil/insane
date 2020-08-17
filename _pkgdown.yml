@@ -9,20 +9,13 @@ authors:
   Mickaël Canouil:
     href: http://mickael.canouil.fr
 
-articles:
-- title: Get Started
-  navbar: ~
-  contents:
-  - '`insane`'
-  - '`protocol`'
-  
 toc:
   depth: 3
 
 reference:
-- title: Use (local R)
+- title: Use in a Local R Session
   contents:
   - '`go_insane`'
-- title: Deploy (shiny server)
+- title: Deploy to a Shiny Server
   contents:
   - '`deploy`'
