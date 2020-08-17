@@ -1,5 +1,5 @@
 ---
-title: "insane: INsulin Secretion ANalysEr"
+title: "insane: Experimental Protocol"
 author: "Amélie Bonnefond, Ph.D."
 email: "amelie.bonnefond@cnrs.fr"
 references:
