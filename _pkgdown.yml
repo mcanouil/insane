@@ -10,15 +10,14 @@ authors:
     href: http://mickael.canouil.fr
 
 articles:
-- title: The Shiny Web Application
+- title: Get Started
   navbar: ~
   contents:
   - '`insane`'
-  
-- title: The Experiemental Protocol
-  navbar: ~
-  contents:
   - '`protocol`'
+  
+toc:
+  depth: 3
 
 reference:
 - title: Use (local R)
