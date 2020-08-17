@@ -8,3 +8,11 @@ development:
 authors:
   Mickaël Canouil:
     href: http://mickael.canouil.fr
+
+articles:
+- title: The Shiny Application
+  contents:
+  - '`insane`'
+- title: The Experimental Protocol
+  contents:
+  - '`protocol`'
