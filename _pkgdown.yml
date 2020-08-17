@@ -9,9 +9,6 @@ authors:
   Mickaël Canouil:
     href: http://mickael.canouil.fr
 
-toc:
-  depth: 3
-
 reference:
 - title: Use in a Local R Session
   contents:
