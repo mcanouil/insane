@@ -16,3 +16,11 @@ articles:
 - title: The Experimental Protocol
   contents:
   - '`protocol`'
+
+reference:
+- title: Use (local R)
+  contents:
+  - '`go_insane`'
+- title: Deploy (shiny server)
+  contents:
+  - '`deploy`'
