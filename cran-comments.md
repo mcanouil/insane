@@ -1,4 +1,4 @@
-New package
+New package lucose-stimulated insulin secretion assay analysis
 
 ## R CMD check results
 
