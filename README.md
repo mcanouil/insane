@@ -34,7 +34,7 @@ Together, insane is a comprehensive method that optimises pre-processing
 and analyses of GSIS experiments in a friendly-user interface.  
 The Shiny App was initially designed for EndoC-betaH1 cell line
 following method described in Ndiaye et al., 2017
-([doi:\[10.1016/j.molmet.2017.03.011](doi:%5B10.1016/j.molmet.2017.03.011)\](<https://doi.org/10.1016/j.molmet.2017.03.011>)).
+(<doi:10.1016/j.molmet.2017.03.011>).
 
 ## Installation
 
