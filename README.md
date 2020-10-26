@@ -9,8 +9,6 @@
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable)
 [![GitHub
 tag](https://img.shields.io/github/tag/mcanouil/insane.svg?label=latest%20tag&include_prereleases)](https://github.com/mcanouil/insane)
-[![Travis-CI Build
-Status](https://travis-ci.org/mcanouil/insane.svg?branch=master)](https://travis-ci.org/mcanouil/insane)
 [![AppVeyor Build
 Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/insane?branch=master&svg=true)](https://ci.appveyor.com/project/mcanouil/insane)
 [![Coverage Status
@@ -34,7 +32,7 @@ Together, insane is a comprehensive method that optimises pre-processing
 and analyses of GSIS experiments in a friendly-user interface.  
 The Shiny App was initially designed for EndoC-betaH1 cell line
 following method described in Ndiaye et al., 2017
-(<doi:10.1016/j.molmet.2017.03.011>).
+([doi:\[10.1016/j.molmet.2017.03.011](doi:%5B10.1016/j.molmet.2017.03.011)\](<https://doi.org/10.1016/j.molmet.2017.03.011>)).
 
 ## Installation
 

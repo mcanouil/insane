@@ -4,7 +4,7 @@ New package lucose-stimulated insulin secretion assay analysis
 
 ### Local server (`devtools::check()`)
 
-* Linux Debian 10, R-4.0.2: OK
+* Linux Debian 10, R-4.0.3: OK
 
 ### win-builder (`devtools::check_win_devel()`)
 
@@ -25,11 +25,3 @@ New package lucose-stimulated insulin secretion assay analysis
 ### Appveyor-ci
 
 * Windows Server 2012 R2 x64 (build 9600), R-4.0.2: OK
-
-### travis-ci
-
-* Ubuntu 16.04.6 LTS, R-devel: OK
-
-* Ubuntu 16.04.6 LTS, R-release: OK
-
-* Ubuntu 16.04.6 LTS, R-3.6: OK
