@@ -1370,6 +1370,7 @@ server <- function(input, output, session) {
         if (input[["use_boxplot"]] == "Boxplot") {
           list(
             ggplot2::geom_boxplot(
+              outlier.shape = NA,
               alpha = 0.2,
               position = ggplot2::position_dodge(width = 0.9),
               na.rm = TRUE
