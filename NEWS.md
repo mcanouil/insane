@@ -1,4 +1,4 @@
-# insane 1.0.0
+# insane 0.1.0
 
 ## New features
 
