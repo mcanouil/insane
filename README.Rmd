@@ -90,7 +90,7 @@ remotes::install_github("mcanouil/insane")
 library("insane")
 go_insane()
 ```
-```{r, echo = FALSE}
+```{r, echo = FALSE, eval = file.exists(gsub(".*/man", "man", gif_app))}
 include_graphics(gsub(".*/man", "man", gif_app))
 ```
 
