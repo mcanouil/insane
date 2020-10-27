@@ -8,7 +8,7 @@ New package glucose-stimulated insulin secretion assay analysis
 
 ### win-builder (`devtools::check_win_devel()`)
 
-* R-devel: 
+* R-devel: NOTE
 
 ### R-hub builder (`rhub::check_for_cran()`)
 
