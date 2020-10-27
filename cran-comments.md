@@ -12,7 +12,7 @@ New package glucose-stimulated insulin secretion assay analysis
 
 ### R-hub builder (`rhub::check_for_cran()`)
 
-* Fedora Linux, R-devel, clang, gfortran: 
+* Fedora Linux, R-devel, clang, gfortran: NOTE
 
 * Ubuntu Linux 16.04 LTS, R-release, GCC: WARNING
 
