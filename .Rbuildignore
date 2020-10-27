@@ -15,6 +15,7 @@
 ^\.github/workflows/R-CMD-check\.yaml$
 ^\.github/workflows/render-readme\.yaml$
 ^man/figures/README-insane_app\.gif$
+^man/figures/insane_app\.mp4$
 ^LICENSE\.md$
 ^docs$
 ^doc$
