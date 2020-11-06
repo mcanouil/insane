@@ -49,6 +49,8 @@ library("insane")
 go_insane()
 ```
 
+<img src="man/figures/README-insane_app.gif" width="100%" />
+
 ## Overview
 
 The Shiny (R package) application **insane** (*INsulin Secretion
