@@ -17,7 +17,7 @@ status](https://github.com/mcanouil/insane/workflows/R-CMD-check/badge.svg)](htt
 [![cran
 checks\_worst](https://cranchecks.info/badges/worst/insane)](https://cran.r-project.org/web/checks/check_results_insane.html)
 [![CRAN\_Download\_total](https://cranlogs.r-pkg.org/badges/insane)](https://cran.r-project.org/package=insane)
-
+[![DOI](https://zenodo.org/badge/170500704.svg)](https://zenodo.org/badge/latestdoi/170500704)
 <!-- badges: end -->
 
 A user-friendly interface, using Shiny, to analyse glucose-stimulated
