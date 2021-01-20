@@ -8,5 +8,7 @@ inst/doc
 doc
 Meta
 inst/app/rsconnect
-article_diabetologia
-article_bioinformatics
+article/
+renv
+renv.lock
+.Rprofile
