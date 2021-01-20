@@ -48,7 +48,29 @@ lm_outlier = 1.5
       normalised_OD = mean_OD - mean_OD[1]
     ),
     by = "filename"
+  ][
+    Step %in% "BLANK" & `Concentration (mU/L)` != 0 & (!is_outlier_OD)
+  ][
+    j = c("Intercept", "Slope") := transpose(list(
+      broom::tidy(
+        stats::lm(
+          formula = log10(normalised_OD) ~ log10(`Concentration (mU/L)` / 23),
+          data = .SD
+        )
+      )[["estimate"]]
+    )),
+    by = "filename"
+  ][
+    j = paste0("is_outlier_", c("Intercept", "Slope")) := lapply(
+      X = .SD, 
+      FUN = function(x) {
+        xq <- stats::quantile(x, c(0.25, 0.75), na.rm = TRUE)
+        xiqr <- stats::IQR(x, na.rm = TRUE)
+        x < xq[1] - od_outlier * xiqr | x > xq[2] + od_outlier * xiqr
+      }
+    ),
+    .SDcols = c("Intercept", "Slope")
   ]
-
+  
   
 # }
