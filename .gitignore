@@ -12,3 +12,4 @@ article/
 renv
 renv.lock
 .Rprofile
+inst/extdata

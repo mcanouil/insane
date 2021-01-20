@@ -11,7 +11,7 @@ get_outliers <- function(data, fold_change) {
     data <- dplyr::full_join(
       x = data,
       y = data %>% 
-        dplyr::filter(Type %in% "Reference") %>% 
+        dplyr::filter(.data[["Type"]] %in% "Reference") %>% 
         dplyr::group_by(.data[["filename"]]) %>% 
         dplyr::summarise(
           is_reference_good = mean(.data[["fc_SUPERNATANT2_SUPERNATANT1"]], na.rm = TRUE) >= fold_change,

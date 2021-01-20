@@ -22,7 +22,7 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
         )
       })
     ) %>%
-    tidyr::unnest(nested_data)
+    tidyr::unnest(cols = .data[["nested_data"]])
   
   if (is.null(project_name)) project_name <- unique(out_all_excel[["Project"]])
   
@@ -47,10 +47,11 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
     ) %>% 
     dplyr::group_by(.data[["filename"]]) %>% 
     dplyr::do({
+      .dta <- .
       lm = broom::tidy(
         stats::lm(
           formula = log10(normalised_OD) ~ log10(`Concentration (mU/L)` / 23),
-          data = .
+          data = .dta
         )
       )[, c("term", "estimate")]
     }) %>% 
@@ -127,8 +128,8 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
     tidyr::drop_na(dplyr::num_range("ins_SUPERNATANT", 1:2)) %>% 
     dplyr::group_by(.data[["filename"]], .data[["sheet_name"]], .data[["Target"]], .data[["measure_id"]]) %>% 
     dplyr::transmute(
-      "fc_SUPERNATANT2_SUPERNATANT1" = ins_SUPERNATANT2 / ins_SUPERNATANT1,
-      "log2_fc_SUPERNATANT2_SUPERNATANT1" = log2(ins_SUPERNATANT2 / ins_SUPERNATANT1)
+      "fc_SUPERNATANT2_SUPERNATANT1" = .data[["ins_SUPERNATANT2"]] / .data[["ins_SUPERNATANT1"]],
+      "log2_fc_SUPERNATANT2_SUPERNATANT1" = log2(.data[["ins_SUPERNATANT2"]] / .data[["ins_SUPERNATANT1"]])
     ) %>% 
     dplyr::ungroup()
   
@@ -149,15 +150,15 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
     dplyr::arrange(.data[["Condition"]], .data[["Sample"]]) %>% 
     dplyr::ungroup() %>% 
     dplyr::mutate(
-      Sample = factor(Sample, levels = unique(.data[["Sample"]])),
+      Sample = factor(.data[["Sample"]], levels = unique(.data[["Sample"]])),
       Type = factor(
-        x = (function(x) { substr(x, 1, 1) <- toupper(substr(x, 1, 1)); x})(Type), 
+        x = (function(x) { substr(x, 1, 1) <- toupper(substr(x, 1, 1)); x })(.data[["Type"]]), 
         levels = c("Reference", "Control", "Target")
       ),
     ) %>% 
     dplyr::arrange(.data[["Type"]], .data[["Target"]]) %>% 
     dplyr::mutate(
       Type_Target = gsub("NA: NA", NA, paste0(.data[["Type"]], ": ", .data[["Target"]])),
-      Type_Target = factor(x = Type_Target, levels = unique(Type_Target))
+      Type_Target = factor(x = .data[["Type_Target"]], levels = unique(.data[["Type_Target"]]))
     )
 }
