@@ -83,15 +83,15 @@ projects separately.
 **insane** performs technical quality-control of the optical density
 measured in each steps of the experiments:
 
-  - blank (*BLANK*),
-  - lysat (*LYSATE*),
-  - supernatant (*SUPERNATANT1* and *SUPERNATANT2*).
+-   blank (*BLANK*),
+-   lysat (*LYSATE*),
+-   supernatant (*SUPERNATANT1* and *SUPERNATANT2*).
 
 This technical quality-control step checks:
 
-  - the variability among the duplicated optical density measures of
+-   the variability among the duplicated optical density measures of
     each samples;
-  - the variability in the blank curves (intercept and slope estimates)
+-   the variability in the blank curves (intercept and slope estimates)
     among all experiments in a project.
 
 <img src="man/figures/README-app_002.png" width="100%" />
@@ -106,24 +106,24 @@ A*).
 Conditions are compared using a linear regression with `Date` and
 `Operator` as covariates (if needed) to control for heterogeneity.
 
-  - Using all experiments in the selected project
-    
-      - Boxplot version
-        
+-   Using all experiments in the selected project
+
+    -   Boxplot version
+
         <img src="man/figures/README-app_003.png" width="65%" />
-    
-      - Histogram version
-        
+
+    -   Histogram version
+
         <img src="man/figures/README-app_004.png" width="65%" />
 
-  - Using some of the experiments in the selected project
-    
+-   Using some of the experiments in the selected project
+
     <img src="man/figures/README-app_005.png" width="65%" />
 
 If and when some experiments are failing any of the technical
 quality-controls, a summary of the issues regarding the selected
-experiments can be displayed using the button `Show Issues in the
-Selected Experiments`.
+experiments can be displayed using the button
+`Show Issues in the Selected Experiments`.
 
 <img src="man/figures/README-app_006.png" width="50%" /><img src="man/figures/README-app_007.png" width="50%" />
 
@@ -144,7 +144,7 @@ on [github](https://github.com/mcanouil/insane/issues).
 For questions and other discussion, please contact the package
 maintainer.
 
------
+------------------------------------------------------------------------
 
 Please note that this project is released with a [Contributor Code of
 Conduct](https://github.com/mcanouil/insane/blob/master/.github/CODE_OF_CONDUCT.md).  
