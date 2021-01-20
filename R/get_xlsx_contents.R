@@ -1,14 +1,12 @@
-#' get_xlsx_contents
+#' Read And Tidy Experiments Spreadsheets
 #'
-#' @param files 
-#' @param project_name 
-#' @param od_outlier 
-#' @param lm_outlier 
+#' @param files A character.
+#' @param project_name A character.
+#' @param od_outlier A numeric.
+#' @param lm_outlier A numeric.
 #'
-#' @return
+#' @return A data.frame.
 #' @export
-#'
-#' @examples
 get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_outlier = 1.5) {
   `%>%` <- dplyr::`%>%`
   

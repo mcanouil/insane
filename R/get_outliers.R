@@ -1,12 +1,10 @@
-#' Title
+#' Extract Outliers
 #'
-#' @param data 
-#' @param fold_change 
+#' @param data A data.frame.
+#' @param fold_change A numeric.
 #'
-#' @return
+#' @return A data.frame.
 #' @export
-#'
-#' @examples
 get_outliers <- function(data, fold_change) {
   `%>%` <- dplyr::`%>%`
   if (!"is_reference_good" %in% colnames(data)) {
