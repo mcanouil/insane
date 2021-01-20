@@ -1,3 +1,5 @@
+^renv$
+^renv\.lock$
 ^\.git$
 ^\.github$
 ^\.gitignore$
@@ -21,5 +23,4 @@
 ^doc$
 ^Meta$
 ^inst/app/rsconnect$
-^article_diabetologia$
-^article_bioinformatics$
+^article$
