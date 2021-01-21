@@ -699,11 +699,11 @@ server <- function(input, output, session) {
         colour = "firebrick2", 
         size = input[["point_size"]]
       ) +
-      ggplot2::geom_smooth(
-        data = ~ dplyr::filter(.x, (.data[["is_outlier_OD"]] | .data[["is_outlier_Intercept"]] | .data[["is_outlier_Slope"]])),
-        colour = "firebrick2", 
-        method = "lm", se = FALSE, formula = y ~ x
-      ) +
+      # ggplot2::geom_smooth(
+      #   data = ~ dplyr::filter(.x, (.data[["is_outlier_OD"]] | .data[["is_outlier_Intercept"]] | .data[["is_outlier_Slope"]])),
+      #   colour = "firebrick2", 
+      #   method = "lm", se = FALSE, formula = y ~ x
+      # ) +
       ggplot2_colour() +
       ggplot2::scale_x_log10() +
       ggplot2::scale_y_log10() +

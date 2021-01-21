@@ -38,4 +38,6 @@ get_outliers <- function(data, fold_change) {
     ),
     by = "filename"
   ]
+  
+  setDF(data)
 }

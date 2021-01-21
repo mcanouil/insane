@@ -180,7 +180,8 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
   data.table::setnames(
     x = out_excel_insulin, 
     old = c("Intercept", "Slope"), 
-    new = paste0("estimate_", c("Intercept", "Slope"))
+    new = paste0("estimate_", c("Intercept", "Slope")), 
+    skip_absent = TRUE
   )
-  out_excel_insulin
+  setDF(out_excel_insulin)
 }
