@@ -16,6 +16,7 @@ suppressPackageStartupMessages({
   library("tidyr")
   library("utils")
   library("insane")
+  library("data.table")
 })
 
 percent <- function(x) paste(round(x * 100, digits = 0), " %")

@@ -25,6 +25,7 @@ Depends:
 Imports:
     stats,
     utils,
+    data.table,
     broom (>= 0.5.6),
     dplyr (>= 1.0.0),
     DT (>= 0.13),

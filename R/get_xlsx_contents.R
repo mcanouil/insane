@@ -44,13 +44,13 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
     j = `:=`("normalised_OD" = mean_OD - mean_OD[1]),
     by = "filename"
   ][
-    j = `:=`(
-      is_outlier_OD = (function(x) {
-        xq <- stats::quantile(x, c(0.25, 0.75), na.rm = TRUE)
-        xiqr <- stats::IQR(x, na.rm = TRUE)
-        x < xq[1] - od_outlier * xiqr | x > xq[2] + od_outlier * xiqr
-      })(re_OD) | is.na(normalised_OD)
-    )
+    j = c("is_outlier_OD", paste0(c("lower", "upper"), "_threshold")) := (function(x) {
+      xq <- stats::quantile(x, c(0.25, 0.75), na.rm = TRUE, names = FALSE)
+      xqthresh <- xq + od_outlier * c(-1, 1) * diff(xq)
+      list(x < xqthresh[1] | x > xqthresh[2], xqthresh[1], xqthresh[2])
+    })(re_OD)
+  ][
+    j = `:=`(is_outlier_OD = is_outlier_OD | is.na(normalised_OD))
   ][
     i = Step %in% "BLANK" & `Concentration (mU/L)` != 0 & (!is_outlier_OD),
     j = c("Intercept", "Slope") := data.table::transpose(list(
@@ -64,18 +64,27 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
     by = "filename"
   ][
     i = Step %in% "BLANK" & `Concentration (mU/L)` != 0 & (!is_outlier_OD),
-    j = paste0("is_outlier_", c("Intercept", "Slope")) := lapply(
-      X = .SD, 
-      FUN = function(x) {
-        xq <- stats::quantile(x, c(0.25, 0.75), na.rm = TRUE)
-        xiqr <- stats::IQR(x, na.rm = TRUE)
-        x < xq[1] - od_outlier * xiqr | x > xq[2] + od_outlier * xiqr
-      }
-    ),
+    j = paste0(
+      c("is_outlier_", paste0(c("lower", "upper"), "_threshold_")), 
+      rep(c("Intercept", "Slope"), each = 3)
+    ) := sapply(
+        X = .SD, 
+        FUN = function(x) {
+          xq <- stats::quantile(x, c(0.25, 0.75), na.rm = TRUE, names = FALSE)
+          xqthresh <- xq + od_outlier * c(-1, 1) * diff(xq)
+          list(x < xqthresh[1] | x > xqthresh[2], xqthresh[1], xqthresh[2])
+        }
+      ),
     .SDcols = c("Intercept", "Slope")
   ][
-    j = c("Intercept", "Slope") := lapply(.SD, function(x) unique(x[!is.na(x)])),
-    .SDcols = c("Intercept", "Slope"),
+    j = c("Intercept", "Slope", paste0(
+      c("is_outlier_", paste0(c("lower", "upper"), "_threshold_")), 
+      rep(c("Intercept", "Slope"), each = 3)
+    )) := lapply(.SD, function(x) unique(x[!is.na(x)])),
+    .SDcols = c("Intercept", "Slope", paste0(
+      c("is_outlier_", paste0(c("lower", "upper"), "_threshold_")), 
+      rep(c("Intercept", "Slope"), each = 3)
+    )),
     by = "filename"
   ][
     j = `:=`(
@@ -168,5 +177,10 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
     j = `:=`("Type_Target" = factor(x = Type_Target, levels = unique(Type_Target)))
   ]
   
+  data.table::setnames(
+    x = out_excel_insulin, 
+    old = c("Intercept", "Slope"), 
+    new = paste0("estimate_", c("Intercept", "Slope"))
+  )
   out_excel_insulin
 }
