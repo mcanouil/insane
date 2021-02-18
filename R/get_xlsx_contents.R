@@ -1,11 +1,16 @@
 #' Read And Tidy Experiments Spreadsheets
 #'
-#' @param files A character.
-#' @param project_name A character.
-#' @param od_outlier A numeric.
-#' @param lm_outlier A numeric.
+#' @param files A character. 
+#'     A path to an Excel file or a vector of paths to Excel files based on the template provided.
+#'      `system.file("app", "www", "template.xlsx", package = "insane")`.
+#' @param project_name A character. A name under which the experiment or set of experiments 
+#'     is to be stored within the shiny app
+#' @param od_outlier A numeric. A multiplicator threshold based on Tukey's method 
+#'     to define outliers in optical density measures.
+#' @param lm_outlier A numeric. A multiplicator threshold based on Tukey's method
+#'     to define outliers in optical density measures for the blank intercept and slope estimates.
 #'
-#' @return A data.frame.
+#' @return A data.frame summarising all imported Excel files in addition to computed variables.
 #' @export
 get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_outlier = 1.5) {
   out_all_excel <- data.table::rbindlist(lapply(
@@ -16,9 +21,13 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
         .file = .file,
         FUN = function(.sheet, .file) {
           tmp <- suppressMessages(readxl::read_xlsx(.file, .sheet, progress = FALSE))
-          tmp <- data.table::setDT(tmp)[
+          tmp <- data.table::setnames(
+            x = data.table::setDT(tmp), 
+            old = colnames(tmp), 
+            new = gsub("\u00b5", "u", colnames(tmp), fixed = TRUE)
+          )[
             j = .SD, 
-            .SDcols = 1:max(grep("Volume \\(µl\\)|OD2", colnames(tmp)))
+            .SDcols = 1:max(grep("Volume \\(ul\\)|OD2", colnames(tmp)))
           ]
           tmp[
             j = `:=`(
@@ -71,7 +80,7 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
         X = .SD, 
         FUN = function(x) {
           xq <- stats::quantile(x, c(0.25, 0.75), na.rm = TRUE, names = FALSE)
-          xqthresh <- xq + od_outlier * c(-1, 1) * diff(xq)
+          xqthresh <- xq + lm_outlier * c(-1, 1) * diff(xq)
           list(x < xqthresh[1] | x > xqthresh[2], xqthresh[1], xqthresh[2])
         }
       ),
@@ -88,7 +97,7 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
     by = "filename"
   ][
     j = `:=`(
-      "Concentration (µg/L)" = {
+      "Concentration (ug/L)" = {
         ctmp <- `Dilution Factor` * 10^((log10(normalised_OD) - Intercept) / Slope)
         data.table::fifelse(
           test = is.na(ctmp) & Step == "BLANK",
@@ -104,7 +113,7 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
   ][
     j = `:=`(
       "measure_id" = 1:.N,
-      "Total (ng)" = `Volume (µl)` / 10^3 * `Concentration (µg/L)`,
+      "Total (ng)" = `Volume (ul)` / 10^3 * `Concentration (ug/L)`,
       is_any_outlier = is_outlier_OD | is_outlier_Intercept | is_outlier_Slope
     ), 
     by = c("filename", "sheet_name", "Target", "Step")
@@ -183,5 +192,5 @@ get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_o
     new = paste0("estimate_", c("Intercept", "Slope")), 
     skip_absent = TRUE
   )
-  setDF(out_excel_insulin)
+  data.table::setDF(out_excel_insulin)
 }

@@ -12,16 +12,21 @@ get_xlsx_contents(
 )
 }
 \arguments{
-\item{files}{A character.}
+\item{files}{A character.
+A path to an Excel file or a vector of paths to Excel files based on the template provided.
+\code{system.file("app", "www", "template.xlsx", package = "insane")}.}
 
-\item{project_name}{A character.}
+\item{project_name}{A character. A name under which the experiment or set of experiments
+is to be stored within the shiny app}
 
-\item{od_outlier}{A numeric.}
+\item{od_outlier}{A numeric. A multiplicator threshold based on Tukey's method
+to define outliers in optical density measures.}
 
-\item{lm_outlier}{A numeric.}
+\item{lm_outlier}{A numeric. A multiplicator threshold based on Tukey's method
+to define outliers in optical density measures for the blank intercept and slope estimates.}
 }
 \value{
-A data.frame.
+A data.frame summarising all imported Excel files in addition to computed variables.
 }
 \description{
 Read And Tidy Experiments Spreadsheets

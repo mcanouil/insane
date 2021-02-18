@@ -1,7 +1,11 @@
 #' Extract Outliers
 #'
-#' @param data A data.frame.
-#' @param fold_change A numeric.
+#' @param data A data.frame. 
+#'     A `data.frame` from `get_xlsx_contents` in which 
+#'     to extract measurements identified as outliers.
+#' @param fold_change A numeric. 
+#'     Fold-change threshold for reference above 
+#'     which the reference is considered 'good'.
 #'
 #' @return A data.frame.
 #' @export
@@ -39,5 +43,5 @@ get_outliers <- function(data, fold_change) {
     by = "filename"
   ]
   
-  setDF(data)
+  data.table::setDF(data)
 }

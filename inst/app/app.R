@@ -23,6 +23,8 @@ percent <- function(x) paste(round(x * 100, digits = 0), " %")
 
 `%>%` <- dplyr::`%>%`
 
+`%||%` <- function (x, y) if (is_null(x)) y else x
+
 ggplot2_themes <- c(
   paste0("ggplot2::", grep("^theme_", ls("package:ggplot2"), value = TRUE), "()"),
   paste0("ggpubr::", grep("^theme_", ls("package:ggpubr"), value = TRUE), "()"),

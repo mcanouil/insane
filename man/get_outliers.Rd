@@ -7,9 +7,13 @@
 get_outliers(data, fold_change)
 }
 \arguments{
-\item{data}{A data.frame.}
+\item{data}{A data.frame.
+A \code{data.frame} from \code{get_xlsx_contents} in which
+to extract measurements identified as outliers.}
 
-\item{fold_change}{A numeric.}
+\item{fold_change}{A numeric.
+Fold-change threshold for reference above
+which the reference is considered 'good'.}
 }
 \value{
 A data.frame.
