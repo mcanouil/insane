@@ -679,9 +679,9 @@ server <- function(input, output, session) {
     shiny::req(xlsx_contents())
     ggplot2::ggplot(
       data = xlsx_contents() %>% 
-        dplyr::filter(.data[["Step"]] == "BLANK" & .data[["Concentration (µg/L)"]] != 0),
+        dplyr::filter(.data[["Step"]] == "BLANK" & .data[["Concentration (ug/L)"]] != 0),
       mapping = ggplot2::aes(
-        x = .data[["Concentration (µg/L)"]], 
+        x = .data[["Concentration (ug/L)"]], 
         y = .data[["normalised_OD"]], 
         colour = .data[["filename"]]
       )
@@ -710,7 +710,7 @@ server <- function(input, output, session) {
       ggplot2::scale_x_log10() +
       ggplot2::scale_y_log10() +
       ggplot2::labs(
-        x = "Concentration (µg/L)",
+        x = "Concentration (\u00b5g/L)",
         y = "Normalised Optical Density (OD)"
       ) +
       ggplot2::theme(legend.position = "none")
