@@ -13,6 +13,17 @@
 #' @return A data.frame summarising all imported Excel files in addition to computed variables.
 #' @export
 get_xlsx_contents <- function(files, project_name = NULL, od_outlier = 1.5, lm_outlier = 1.5) {
+  # ---------------------
+  # Fix no visible binding for global variable from data.table
+  OD2 <- OD1 <- Project <- mean_OD <- re_OD <- is_outlier_OD <- normalised_OD <- NULL
+  Step <- `Concentration (mU/L)` <- `Dilution Factor` <- Intercept <- Slope <- NULL
+  `Volume (ul)` <- `Concentration (ug/L)` <- is_outlier_Intercept <- is_outlier_Slope <- NULL
+  is_any_outlier <- filename <- sheet_name <- Target <- measure_id <- NULL
+  SUPERNATANT1 <- LYSATE <- SUPERNATANT2 <- ins_SUPERNATANT2 <- ins_SUPERNATANT1 <- NULL
+  `Insulin Secretion (% of content)` <- fc_SUPERNATANT2_SUPERNATANT1 <- Sample <- NULL
+  Type <- Type_Target <- NULL
+  # ---------------------
+  
   out_all_excel <- data.table::rbindlist(lapply(
     X = files,
     FUN = function(.file) {

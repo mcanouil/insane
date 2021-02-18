@@ -10,7 +10,14 @@
 #' @return A data.frame.
 #' @export
 get_outliers <- function(data, fold_change) {
-  if (!inherits(x = data, what = "data.table")) data <- as.data.table(data)
+  # ---------------------
+  # Fix no visible binding for global variable from data.table
+  Type <- fc_SUPERNATANT2_SUPERNATANT1 <- is_reference_good <- NULL
+  is_any_outlier <- is_outlier_Intercept <- is_outlier_Slope <- NULL
+  is_outlier_OD <- NULL
+  # ---------------------
+  
+  if (!inherits(x = data, what = "data.table")) data <- data.table::as.data.table(data)
   
   if (!"is_reference_good" %in% colnames(data)) {
     data[
