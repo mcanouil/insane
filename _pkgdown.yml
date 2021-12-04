@@ -1,13 +1,13 @@
 template:
-  params:
-    bootswatch: sandstone
+  bootstrap: 5
+  bootswatch: sandstone
 
 development:
   mode: auto
 
 authors:
   Mickaël Canouil:
-    href: http://mickael.canouil.fr
+    href: https://mickael.canouil.fr
 
 reference:
 - title: Use in a Local R Session
