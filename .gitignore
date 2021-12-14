@@ -3,12 +3,3 @@
 .RData
 .Ruserdata
 **.mp4
-docs/
-inst/doc
-doc
-Meta
-inst/app/rsconnect
-article/
-renv
-renv.lock
-.Rprofile
