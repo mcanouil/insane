@@ -5,7 +5,7 @@
 - In `DESCRIPTION`,
   - chore: update email address.
 
-**Full Changelog**: <https://github.com/mcanouil/eggla/compare/v0.1.0...v1.0.0>
+**Full Changelog**: <https://github.com/mcanouil/insane/compare/v0.1.0...v1.0.0>
 
 # insane 0.1.0
 
