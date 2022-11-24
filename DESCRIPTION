@@ -1,11 +1,11 @@
 Package: insane
 Title: INsulin Secretion ANalysEr
-Version: 0.1.0.9000
+Version: 1.0.0
 Authors@R: 
     person(given = "Mickaël",
            family = "Canouil",
            role = c("aut", "cre"),
-           email = "mickael.canouil@cnrs.fr",
+           email = "mickael@canouil.dev",
            comment = c(ORCID = "0000-0002-3396-4549"))
 Description: A user-friendly interface, using Shiny, to analyse glucose-stimulated insulin secretion (GSIS) 
     assays in pancreatic beta cells or islets.
