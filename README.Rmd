@@ -57,11 +57,10 @@ gif_app <- paste0(opts_chunk$get("fig.path"), "insane_app.gif")
 # INsulin Secretion ANalysEr <img src="man/figures/insane.png" align="right" width="120" />
 
 <!-- badges: start -->
-[![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 [![GitHub
 tag](https://img.shields.io/github/tag/mcanouil/insane.svg?label=latest%20tag&include_prereleases)](https://github.com/mcanouil/insane)
 [![Codecov test
-coverage](https://codecov.io/gh/mcanouil/insane/branch/main/graph/badge.svg)](https://codecov.io/gh/mcanouil/insane?branch=main)
+coverage](https://codecov.io/gh/mcanouil/insane/branch/main/graph/badge.svg)](https://app.codecov.io/gh/mcanouil/insane/tree/main/)
 [![R-CMD-check](https://github.com/mcanouil/insane/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/insane/actions)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version-ago/insane)](https://cran.r-project.org/package=insane)
 [![cran

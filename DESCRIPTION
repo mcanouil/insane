@@ -19,7 +19,7 @@ Description: A user-friendly interface, using Shiny, to analyse glucose-stimulat
     in Ndiaye et al., 2017 (<doi:10.1016/j.molmet.2017.03.011>).
 License: MIT + file LICENSE
 URL: https://github.com/mcanouil/insane/, https://m.canouil.fr/insane/
-BugReports: https://github.com/mcanouil/insane/issues
+BugReports: https://github.com/mcanouil/insane/issues/
 Depends: 
     R (>= 3.6.0)
 Imports:
