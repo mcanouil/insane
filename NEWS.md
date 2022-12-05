@@ -1,10 +1,10 @@
-# insane 1.0.0
+# insane 1.0.1
 
 ## Chores
 
 - In `DESCRIPTION`,
   - chore: update email address.
-  - 
+- chore: remove `ggbeeswarm`.
 
 **Full Changelog**: <https://github.com/mcanouil/insane/compare/v1.0.0...v1.0.1>
 
