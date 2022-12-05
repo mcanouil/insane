@@ -1,7 +1,7 @@
 ---
 title: "insane: INsulin Secretion ANalysEr"
 author: "Mickaël Canouil, Ph.D."
-email: "***REMOVED***"
+email: "mickael.canouil@cnrs.fr"
 date: '`r format(Sys.time(), "%B %d, %Y")`'
 output: 
   rmarkdown::html_vignette:

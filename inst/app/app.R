@@ -5,7 +5,6 @@ suppressPackageStartupMessages({
     library("broom")
     library("dplyr")
     library("DT")
-    library("ggbeeswarm")
     library("ggplot2")
     library("ggpubr")
     library("ggthemes")
@@ -732,17 +731,17 @@ server <- function(input, output, session) {
       ) +
       ggplot2::geom_hline(yintercept = 0, linetype = 2) +
       ggplot2::geom_boxplot(outlier.shape = NA, alpha = 0.2) +
-      ggbeeswarm::geom_beeswarm(
+      ggplot2::geom_point(
         data = ~ dplyr::filter(.x, .data[["is_outlier_OD"]]), 
         colour = "firebrick2",
         size = input[["point_size"]],
-        groupOnX = TRUE
+        position = ggplot2::position_jitter(width = 0.6)
       ) +
-      ggbeeswarm::geom_quasirandom(
+      ggplot2::geom_point(
         data = ~ dplyr::filter(.x, !.data[["is_outlier_OD"]]), 
         shape = 1,
         size = input[["point_size"]],
-        groupOnX = TRUE
+        position = ggplot2::position_jitter(width = 0.6)
       ) +
       ggplot2::scale_y_continuous(labels = percent) +
       ggplot2_colour() +
@@ -837,18 +836,18 @@ server <- function(input, output, session) {
         linetype = 2
       ) +
       ggplot2::geom_boxplot(outlier.shape = NA, alpha = 0.2) +
-      ggbeeswarm::geom_beeswarm(
+      ggplot2::geom_point(
         data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
         colour = "firebrick2",
         size = input[["point_size"]],
-        groupOnX = TRUE
+        position = ggplot2::position_jitter(width = 0.6)
       ) +
-      ggbeeswarm::geom_quasirandom(
+      ggplot2::geom_point(
         data = ~ dplyr::filter(.x, !.data[["is_outlier"]]),
         mapping = ggplot2::aes(colour = .data[["filename"]]),
         shape = 1,
         size = input[["point_size"]],
-        groupOnX = TRUE
+        position = ggplot2::position_jitter(width = 0.6)
       ) +
       ggplot2_colour() +
       ggplot2::labs(x = NULL, y = "Estimate") +
@@ -1023,13 +1022,14 @@ server <- function(input, output, session) {
       ) +
       ggplot2::geom_boxplot(alpha = 0.2, width = 0.5, outlier.shape = NA) +
       ggplot2::geom_violin(alpha = 0.2) +
-      ggbeeswarm::geom_quasirandom(
+      ggplot2::geom_point(
         mapping = ggplot2::aes(
           colour = .data[["Condition"]],
           fill = .data[["Condition"]]
         ),
         size = input[["point_size"]],
-        shape = 1
+        shape = 1,
+        position = ggplot2::position_jitter(width = 0.6)
       ) +
       ggplot2::scale_x_discrete(labels = (function(x) gsub(".*: ", "", x))) +
       ggplot2::scale_y_continuous(limits = c(0, NA), expand = ggplot2::expansion(mult = c(0, 0.05))) +

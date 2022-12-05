@@ -11,7 +11,6 @@
 #' @importFrom broom tidy
 #' @importFrom dplyr `%>%` tibble mutate filter group_by ungroup do full_join n select transmute arrange summarise distinct bind_rows matches num_range across
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom ggbeeswarm geom_beeswarm geom_quasirandom
 #' @import ggplot2
 #' @import ggpubr
 #' @import ggthemes
