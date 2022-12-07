@@ -12,7 +12,7 @@ coverage](https://codecov.io/gh/mcanouil/insane/branch/main/graph/badge.svg)](ht
 [![R-CMD-check](https://github.com/mcanouil/insane/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/insane/actions)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version-ago/insane)](https://cran.r-project.org/package=insane)
 [![cran
-checks_worst](https://cranchecks.info/badges/worst/insane)](https://cran.r-project.org/web/checks/check_results_insane.html)
+checks_worst](https://badges.cranchecks.info/worst/insane)](https://cran.r-project.org/web/checks/check_results_insane.html)
 [![CRAN_Download_total](https://cranlogs.r-pkg.org/badges/insane)](https://cran.r-project.org/package=insane)
 [![DOI](https://zenodo.org/badge/170500704.svg)](https://zenodo.org/badge/latestdoi/170500704)
 <!-- badges: end -->
@@ -54,12 +54,15 @@ The Shiny (R package) application **insane** (*INsulin Secretion
 ANalysEr*) provides a web interactive tool to import experiments of
 insulin secretion using cell lines such as EndoC-βH1.
 
-1.  [Excel Template](#excel-template-top)  
-2.  [The App](#the-app-top)
-    1.  [Technical Quality-Control](#technical-quality-control-top)  
-    2.  [Statistical analyses](#statistical-analyses-top)  
-    3.  [List of Outliers (Issues
-        Detected)](#list-of-outliers-issues-detected-top)
+- [INsulin Secretion ANalysEr ](#insulin-secretion-analyser-)
+  - [Installation](#installation)
+  - [Overview](#overview)
+    - [Excel Template (top)](#excel-template-top)
+    - [The App (top)](#the-app-top)
+      - [Technical Quality-Control (top)](#technical-quality-control-top)
+      - [Statistical analyses (top)](#statistical-analyses-top)
+      - [List of Outliers (Issues Detected) (top)](#list-of-outliers-issues-detected-top)
+  - [Getting help](#getting-help)
 
 ### Excel Template ([top](#overview))
 
