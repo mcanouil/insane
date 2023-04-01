@@ -5,3 +5,4 @@
 .Rprofile
 **.mp4
 renv/
+renv.lock
