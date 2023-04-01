@@ -12,7 +12,7 @@ A user-friendly interface, using Shiny, to analyse glucose-stimulated insulin se
 Useful links:
 \itemize{
   \item \url{https://github.com/mcanouil/insane/}
-  \item \url{https://m.canouil.fr/insane/}
+  \item \url{https://m.canouil.dev/insane/}
   \item Report bugs at \url{https://github.com/mcanouil/insane/issues/}
 }
 
