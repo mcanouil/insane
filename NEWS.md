@@ -1,3 +1,12 @@
+# insane 1.0.2
+
+## Chores
+
+- In `DESCRIPTION`,
+  - chore: update domain name.
+
+**Full Changelog**: <https://github.com/mcanouil/insane/compare/v1.0.1...v1.0.2>
+
 # insane 1.0.1
 
 ## Chores
