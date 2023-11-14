@@ -7,7 +7,6 @@ suppressPackageStartupMessages({
     library("DT")
     library("ggplot2")
     library("ggpubr")
-    library("ggthemes")
     library("glue")
     library("purrr")
     library("readxl")
@@ -23,8 +22,7 @@ percent <- function(x) paste(round(x * 100, digits = 0), " %")
 
 ggplot2_themes <- c(
   paste0("ggplot2::", grep("^theme_", ls("package:ggplot2"), value = TRUE), "()"),
-  paste0("ggpubr::", grep("^theme_", ls("package:ggpubr"), value = TRUE), "()"),
-  paste0("ggthemes::", grep("^theme_", ls("package:ggthemes"), value = TRUE), "()")
+  paste0("ggpubr::", grep("^theme_", ls("package:ggpubr"), value = TRUE), "()")
 ) %>% 
   setdiff(paste0("ggplot2::theme_", c("get", "set", "replace", "update"), "()")) %>% 
   setdiff(paste0("ggpubr::theme_", c("cleveland"), "()")) %>% 

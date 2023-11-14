@@ -1,3 +1,10 @@
+# insane 1.0.3
+
+## Chores
+
+- In `DESCRIPTION`, `inst/app/app.R`, and `R/go_insane.R`,
+  - chore: remove `ggthemes` to avoid archiving.
+
 # insane 1.0.2
 
 ## Chores
@@ -32,8 +39,8 @@
 
 ## New features
 
-* New Shiny app in `inst/app/`.
-* New `deploy()` (`R/deploy.R`) function to easily deploy (copy) the shiny app to a specified directory.
-* New `go_insane()` (`R/go_insane.R`) function to easily run (`shiny::runApp()`) the shiny app.
-* New vignette `insane` describing the Shiny app.
-* New vignette `protocol`, describing the experimental protocol on which the Shiny app is built on.
+- New Shiny app in `inst/app/`.
+- New `deploy()` (`R/deploy.R`) function to easily deploy (copy) the shiny app to a specified directory.
+- New `go_insane()` (`R/go_insane.R`) function to easily run (`shiny::runApp()`) the shiny app.
+- New vignette `insane` describing the Shiny app.
+- New vignette `protocol`, describing the experimental protocol on which the Shiny app is built on.
