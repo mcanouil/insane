@@ -6,16 +6,23 @@ on:
     paths: ['README.md']
     tags: ['*']
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: [main, master]
   release:
     types: [published]
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
 
 name: pkgdown
 
 jobs:
   pkgdown:
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.draft != true }}
+    timeout-minutes: 30
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:

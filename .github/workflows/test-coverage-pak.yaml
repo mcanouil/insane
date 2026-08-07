@@ -4,13 +4,20 @@ on:
   push:
     branches: [main, master]
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 name: test-coverage
 
 jobs:
   test-coverage:
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.draft != true }}
+    timeout-minutes: 30
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
